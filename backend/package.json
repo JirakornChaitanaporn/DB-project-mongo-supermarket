@@ -1,0 +1,22 @@
+{
+  "name": "db-supermarket",
+  "version": "1.0.0",
+  "description": "This is database supermarket project. It will use mongodb to do query and show",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon -L index.js"
+  },
+  "keywords": [
+    "react",
+    "mongo",
+    "supermarket"
+  ],
+  "author": "jirakorn.c@ku.th",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^2.2.1",
+    "express": "^5.1.0",
+    "mongoose": "^9.0.0"
+  }
+}
