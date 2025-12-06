@@ -24,3 +24,16 @@ services:
       - ./backend:/app
     depends_on:
       - db
+  
+  supermarket_frontend:
+    build: ./frontend
+    image: supermarket_frontend:1.0.0
+    container_name: supermarket_frontend
+    restart: always
+    ports:
+      - 5176:5173
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - my_express
