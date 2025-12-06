@@ -1,8 +1,11 @@
 //import express from 'express';
 const express = require('express');
 const dotenv = require('dotenv')
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+//import mongoose from 'mongoose';
 const mongoose = require('mongoose');
+
+const { customerSchema } = require('./schema/customer');
 
 dotenv.config()
 const app = express()
@@ -14,7 +17,10 @@ const mongoUrl = process.env.MONGO_URL;
 // create json parser
 jsonParser = bodyParser.json();
 
-mongoose.connect("mongodb://"+mongoUsername+":"+mongoPassword+"@"+mongoUrl)
+mongoose.connect("mongodb://"+mongoUsername+":"+mongoPassword+"@"+mongoUrl+"?authSource=admin")
+    .catch((err) => {
+        console.log(err);
+    })
 
 // end-point
 app.get('/test', (req, res) => {
@@ -34,6 +40,16 @@ app.get('/search-prodct/:id', (req, res) => {
 app.post('/create-product', jsonParser, (req, res) => {
     return res.json(req.body);
     
+})
+
+app.post('/create-customer', jsonParser, async (req, res) => {
+    const body = req.body
+    const Customer = mongoose.model('Customer', customerSchema); // use / create collection name "Customer"
+
+    const new_doc = new Customer(body); // new empty document of Customer collection 
+    await new_doc.save();
+
+    return res.json(new_doc)
 })
 
 // run express
