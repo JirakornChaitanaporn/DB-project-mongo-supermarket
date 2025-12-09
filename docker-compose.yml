@@ -5,8 +5,7 @@ services:
     image: mongo:8.2.2
     container_name: mongo
     volumes:
-    #front is local: back is the container
-    - ./backend/data:/etc/mongo
+    - ./backend/data:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: productInSupermarket
