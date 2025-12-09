@@ -102,7 +102,7 @@ export function CreateProduct() {
         />
       </div>
 
-      <button type="submit">Create Product</button>
+      <button type="button">Create Product</button>
     </form>
   );
 }
