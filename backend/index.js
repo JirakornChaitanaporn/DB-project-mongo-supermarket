@@ -5,6 +5,12 @@ const express = require('express');
 const customerRouter = require('./routes/customer')
 const employeeRouter = require('./routes/employee')
 const roleRouter = require('./routes/role')
+const productCategoryRouter = require('./routes/product_category')
+const supplierRouter = require('./routes/supplier')
+const productRouter = require('./routes/product')
+const billRouter = require('./routes/bill')
+const billItemRouter = require('./routes/bill_item')
+const promotionRouter = require('./routes/promotion')
 
 dotenv.config()
 const port = process.env.EXPRESS_PORT || 5175;
@@ -13,6 +19,12 @@ const app = express()
 app.use(customerRouter);
 app.use(employeeRouter);
 app.use(roleRouter);
+app.use(productCategoryRouter);
+app.use(supplierRouter);
+app.use(productRouter);
+app.use(billRouter);
+app.use(billItemRouter);
+app.use(promotionRouter);
 // end-point
 /*app.get('/test', (req, res) => {
     return res.send("My Test end point 999")
@@ -37,5 +49,5 @@ app.post('/create-product', jsonParser, (req, res) => {
 
 // run express
 app.listen(port, () => {
-    console.log('Super market backend listening on port '+port);
+    console.log('Super market backend listening on port ' + port);
 })
