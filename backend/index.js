@@ -1,7 +1,6 @@
 const dotenv = require('dotenv')
-
-//import express from 'express';
 const express = require('express');
+const cors = require('cors');
 const customerRouter = require('./routes/customer')
 const employeeRouter = require('./routes/employee')
 const roleRouter = require('./routes/role')
@@ -16,9 +15,19 @@ dotenv.config()
 const port = process.env.EXPRESS_PORT || 5175;
 
 const app = express()
+
+// Add CORS middleware
+app.use(cors());
+
+// Add body parser middleware BEFORE routes
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Add routes
 app.use(customerRouter);
 app.use(employeeRouter);
 app.use(roleRouter);
+
 app.use(productCategoryRouter);
 app.use(supplierRouter);
 app.use(productRouter);
