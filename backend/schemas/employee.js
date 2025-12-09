@@ -31,11 +31,7 @@ export const employeeSchema = new Schema({
         required: [true, 'Please send created_at']
     },
     role_id: {
-        type:Schema.ObjectId
-        
+        type:Schema.ObjectId,
+         required: [true, 'Please send role_name']
     },
-    role_name: {
-        type: String,
-        required: [true, 'Please send role_name']
-    }
 });
