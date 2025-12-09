@@ -8,12 +8,12 @@ import { useState } from "react";
 // import pages
 import {} from "./tables/bill_items"
 import {} from "./tables/bill"
-import {} from "./tables/customers"
-import {} from "./tables/employees"
+import { CreateCustomers } from "./tables/customers"
+import { CreateEmployees } from "./tables/employees"
 import {} from "./tables/product_categories"
 import { CreateProduct } from "./tables/product";
 import {} from "./tables/promotions"
-import {} from "./tables/roles"
+import { CreateRoles } from "./tables/roles"
 import {} from "./tables/suppliers"
 
 export function CreatePage() {
@@ -29,24 +29,32 @@ export function CreatePage() {
       {/* Navigation Bar */}
       <nav className="global-top-navigation">
         <div className="margaintoleft-x4">
-          <a href="/" className="text-nav">Home</a>
+          <a href="/" className="text-nav">
+            Home
+          </a>
         </div>
       </nav>
 
       {/* The Whole Page */}
       <div className="main-container">
-        <div className="main-background" style={{ backgroundImage: `url(${bg0img})` }}></div>
+        <div
+          className="main-background"
+          style={{ backgroundImage: `url(${bg0img})` }}
+        ></div>
 
         {/* All Content in Here */}
         <div className="global-container">
           <div className="header-wrapper">
             <header className="header-x2">
               <a style={{ marginRight: "18px" }}>
-                <img src={l0go} width="128" height="128" data-test="fandom-community-header-community-logo"></img>
+                <img
+                  src={l0go}
+                  width="128"
+                  height="128"
+                  data-test="fandom-community-header-community-logo"
+                ></img>
               </a>
-              <div className="header-text">
-                DB-project-mongo-supermarket
-              </div>
+              <div className="header-text">DB-project-mongo-supermarket</div>
             </header>
           </div>
           <div className="page">
@@ -58,19 +66,26 @@ export function CreatePage() {
               <div className="bottom-gap">
                 <DropdownButton
                   defaultLabel="Choose Topic"
-                  options={["Product",
-                            "Product_Categories",
-                            "Nigga",
-                          ]}
-                  onSelect={(topic) => handlePageChange(topic)} 
+                  options={[
+                    "Product",
+                    "Product_Categories",
+                    "Dont click this Nigga",
+                    "Customer",
+                    "Role",
+                    "Employee",
+                  ]}
+                  onSelect={(topic) => handlePageChange(topic)}
                 />
               </div>
 
               <div className="bottom-gap">
                 {/* Condition on currentPage */}
+
+                {currentPage === "Customer" && <CreateCustomers />}
+                {currentPage === "Role" && <CreateRoles />}
+                {currentPage === "Employee" && <CreateEmployees />}
                 {currentPage === "Product" && <CreateProduct />}
                 {currentPage === "Product_Categories" && <p>Place?holder</p>}
-
                 {/* None */}
                 {currentPage === "" && <p>Please choose a topic above.</p>}
               </div>
@@ -79,11 +94,8 @@ export function CreatePage() {
         </div>
 
         {/* End Part */}
-        <div className="global-footer">
-
-        </div>
+        <div className="global-footer"></div>
       </div>
-
     </div>
   );
 }

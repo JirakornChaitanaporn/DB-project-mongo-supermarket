@@ -20,6 +20,7 @@ const insert_employee = async (req,res) => {
     const new_doc = new Employee(body);
     const error = await new_doc.validateSync();
     if (error) {
+        console.log("there is error bro")
         return res.status(400).json({ msg: getMongoErrorMsg(error.errors) })
     }
 
