@@ -6,6 +6,7 @@ import DropdownButton from "../../component/dropdown/choose_button";
 import { useState } from "react";
 
 // import pages
+import { ReadEmployees } from "./tables/employees";
 import { ReadBillItems } from "./tables/bill_items";
 import { ReadBill } from "./tables/bill";
 import { ReadCustomers } from "./tables/customers";
@@ -15,6 +16,7 @@ import { ReadProduct } from "./tables/product";
 import {} from "./tables/promotions";
 import { ReadRoles } from "./tables/roles";
 import { ReadSuppliers } from "./tables/suppliers";
+import { ReadPromotions } from "./tables/promotions";
 
 export function ReadPage() {
 
@@ -29,24 +31,32 @@ export function ReadPage() {
       {/* Navigation Bar */}
       <nav className="global-top-navigation">
         <div className="margaintoleft-x4">
-          <a href="/" className="text-nav">Home</a>
+          <a href="/" className="text-nav">
+            Home
+          </a>
         </div>
       </nav>
 
       {/* The Whole Page */}
       <div className="main-container">
-        <div className="main-background" style={{ backgroundImage: `url(${bg0img})` }}></div>
+        <div
+          className="main-background"
+          style={{ backgroundImage: `url(${bg0img})` }}
+        ></div>
 
         {/* All Content in Here */}
         <div className="global-container">
           <div className="header-wrapper">
             <header className="header-x2">
               <a style={{ marginRight: "18px" }}>
-                <img src={l0go} width="128" height="128" data-test="fandom-community-header-community-logo"></img>
+                <img
+                  src={l0go}
+                  width="128"
+                  height="128"
+                  data-test="fandom-community-header-community-logo"
+                ></img>
               </a>
-              <div className="header-text">
-                DB-project-mongo-supermarket
-              </div>
+              <div className="header-text">DB-project-mongo-supermarket</div>
             </header>
           </div>
           <div className="page">
@@ -58,17 +68,18 @@ export function ReadPage() {
               <div className="bottom-gap">
                 <DropdownButton
                   defaultLabel="Choose Topic"
-                  options={["Bill_Item",
-                            "Bill",
-                            "Customer",
-                            "Employee",                     
-                            "Product_Categories",
-                            "Product",
-                            "Promotion",
-                            "Role",
-                            "Supplier"
-                          ]}
-                  onSelect={(topic) => handlePageChange(topic)} 
+                  options={[
+                    "Bill_Item",
+                    "Bill",
+                    "Customer",
+                    "Employee",
+                    "Product_Categories",
+                    "Product",
+                    "Promotion",
+                    "Role",
+                    "Supplier",
+                  ]}
+                  onSelect={(topic) => handlePageChange(topic)}
                 />
               </div>
 
@@ -77,10 +88,12 @@ export function ReadPage() {
                 {currentPage === "Bill_Item" && <ReadBillItems />}
                 {currentPage === "Bill" && <ReadBill />}
                 {currentPage === "Customer" && <ReadCustomers />}
-                {currentPage === "Employee" && <p>Please choose a topic above.</p>}
-                {currentPage === "Product_Categories" && <p>Please choose a topic above.</p>}
+                {currentPage === "Employee" && <ReadEmployees />}
+                {currentPage === "Product_Categories" && (
+                  <ReadProductCategories />
+                )}
                 {currentPage === "Product" && <ReadProduct />}
-                {currentPage === "Promotion" && <p>Please choose a topic above.</p>}
+                {currentPage === "Promotion" && <ReadPromotions />}
                 {currentPage === "Role" && <ReadRoles />}
                 {currentPage === "Supplier" && <ReadSuppliers />}
 
@@ -92,11 +105,8 @@ export function ReadPage() {
         </div>
 
         {/* End Part */}
-        <div className="global-footer">
-
-        </div>
+        <div className="global-footer"></div>
       </div>
-
     </div>
   );
 }
