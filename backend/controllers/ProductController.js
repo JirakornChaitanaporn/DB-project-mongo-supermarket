@@ -1,45 +1,16 @@
 const { createConnection } = require("../utils/mongo");
 const mongoose = require("mongoose");
-
-// Define schema
-const ProductSchema = new mongoose.Schema({
-    product_name: {
-        type: String,
-        required: true,
-    },
-    price: {
-        type: Number,
-        required: true,
-    },
-    supplier_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Supplier",
-        required: true,
-    },
-    category_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",
-        required: true,
-    },
-    quantity: {
-        type: Number,
-        required: true,
-    },
-    created_at: {
-        type: Date,
-        default: Date.now,
-    },
-}, { collection: "products" });
+const {ProductSchema} = require("../schemas/ProductModel")
 
 // Create
 const create = async (req, res) => {
   try {
     const conn = createConnection();
     const Product = conn.model("Product", ProductSchema);
-    
+
     const productData = new Product(req.body);
     const savedProduct = await productData.save();
-    
+
     await conn.close();
     res.status(200).json(savedProduct);
   } catch (error) {
@@ -53,14 +24,14 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Product = conn.model("Product", ProductSchema);
-    
+
     // Register referenced schemas
     const CategorySchema = new mongoose.Schema({
       category_name: { type: String, required: true, unique: true },
       category_description: { type: String }
     }, { collection: "categories" });
     conn.model("Category", CategorySchema);
-    
+
     const SupplierSchema = new mongoose.Schema({
       supplier_name: { type: String, required: true },
       contacts: {
@@ -76,7 +47,7 @@ const fetch = async (req, res) => {
       }
     }, { collection: "suppliers" });
     conn.model("Supplier", SupplierSchema);
-    
+
     const { search } = req.query;
 
     let query = {};
@@ -102,7 +73,7 @@ const update = async (req, res) => {
     const conn = createConnection();
     const Product = conn.model("Product", ProductSchema);
     const id = req.params.id;
-    
+
     const productExist = await Product.findById(id);
 
     if (!productExist) {
@@ -125,7 +96,7 @@ const deleteProduct = async (req, res) => {
     const conn = createConnection();
     const Product = conn.model("Product", ProductSchema);
     const id = req.params.id;
-    
+
     const productExist = await Product.findById(id);
 
     if (!productExist) {
@@ -142,4 +113,20 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-module.exports = { create, fetch, update, deleteProduct };
+const fetchById = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Product = conn.model("Product", ProductSchema);
+    const { id } = req.params;
+
+    const product = await Product.findById(id);
+
+    await conn.close();
+    res.status(200).json(product);
+  } catch (error) {
+    console.error("Fetch product error:", error);
+    res.status(500).json({ error: "Server error while fetching product" });
+  }
+};
+
+module.exports = { create, fetch, fetchById, update, deleteProduct };

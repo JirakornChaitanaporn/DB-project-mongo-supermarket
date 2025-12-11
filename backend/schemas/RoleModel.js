@@ -1,18 +1,16 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const RoleSchema = new mongoose.Schema({
+export const RoleSchema = new mongoose.Schema({
     role_name: {
         type: String,
-        required: true,
+        required: [true, "role name is needed"],
     },
     role_description: {
         type: String,
     },
     role_salary: {
         type: Number,
-        required: true,
-        min: 10000,
+        required: [true],
+        min: [10000, "10000 is the minimun please do not be cruel"],
     },
 }, { collection: "roles" });
-
-module.exports = mongoose.model("Role", RoleSchema);

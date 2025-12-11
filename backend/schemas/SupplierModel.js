@@ -1,41 +1,39 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const SupplierSchema = new mongoose.Schema({
+export const SupplierSchema = new mongoose.Schema({
     supplier_name: {
         type: String,
-        required: true,
+        required: [true, "supplier name is needed"],
     },
     contacts: {
-        person: { 
+        person: {
             type: String,
-            required: true,
+            required: [true, "contact person is needed"],
         },
-        email: { 
+        email: {
             type: String,
         },
-        phone: { 
+        phone: {
             type: String,
-            required: true,
+            required: [true, "phone is needed"],
         },
     },
     address: {
-        street: { 
+        street: {
             type: String,
-            required: true,
+            required: [true, "street name is needed"],
         },
-        city: { 
+        city: {
             type: String,
-            required: true,
+            required: [true, "city is needed"],
         },
-        postal_code: { 
+        postal_code: {
             type: String,
-            required: true,
+            required: [true, "postal code is needed"],
         },
-        country: { 
+        country: {
             type: String,
-            required: true,
+            required: [true, "country is needed"],
         },
     },
 }, { collection: "suppliers" });
-
-module.exports = mongoose.model("Supplier", SupplierSchema);

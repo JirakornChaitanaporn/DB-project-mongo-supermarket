@@ -39,12 +39,6 @@ app.use("/api/promotion", promotionRouter)
 app.use("/api/role", roleRouter)
 app.use("/api/supplier", supplierRouter)
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Server error:', err);
-    res.status(500).json({ msg: 'Internal server error', error: err.message });
-});
-
 // run express
 app.listen(port, () => {
     console.log('Super market backend listening on port '+port);

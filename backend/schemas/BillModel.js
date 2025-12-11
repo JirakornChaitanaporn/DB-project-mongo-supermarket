@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const BillSchema = new mongoose.Schema({
+export const BillSchema = new mongoose.Schema({
     customer_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Customer",
@@ -9,7 +9,7 @@ const BillSchema = new mongoose.Schema({
     employee_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Employee",
-        required: true,
+        required: [true, "Employee ID is required"],
     },
     products: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -26,5 +26,3 @@ const BillSchema = new mongoose.Schema({
         default: Date.now,
     }
 }, { collection: "bills" });
-
-module.exports = mongoose.model("Bill", BillSchema);
