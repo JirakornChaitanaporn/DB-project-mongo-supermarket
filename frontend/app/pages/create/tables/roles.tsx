@@ -1,150 +1,91 @@
 import React, { useState } from "react";
-
 import { domain_link } from "../../domain";
 
-export function CreateRoles() {
+export function CreateRole() {
   const [role_name, setRoleName] = useState("");
-  const [role_description, setRoleDesc] = useState("");
-  const [role_salary, setSalary] = useState("");
+  const [role_description, setRoleDescription] = useState("");
+  const [role_salary, setRoleSalary] = useState(10000);
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const bodyData = {
-      role_name: role_name,
-      role_description: role_description,
+      role_name,
+      role_description,
       role_salary: Number(role_salary),
     };
 
     try {
-      const response = await fetch("http://localhost:8002/role", {
+      const response = await fetch(`${domain_link}api/role/create`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        alert("Role created successfully!");
+        setMessage("Role created successfully!");
+        // Reset form
         setRoleName("");
-        setRoleDesc("");
-        setSalary("");
+        setRoleDescription("");
+        setRoleSalary(10000);
       } else {
-        const err = await response.json();
-        alert("Error: " + (err.msg || err.message));
+        setMessage(data.error || "Error creating role");
       }
-    } catch (error) {
-      alert("Failed to connect to server");
-      console.error(error);
+    } catch (err) {
+      console.error("Error:", err);
+      setMessage("Server error while creating role");
     }
   };
 
-  const styles = {
-    container: {
-      maxWidth: "500px",
-      margin: "40px auto",
-      padding: "30px",
-      backgroundColor: "#ffffff",
-      borderRadius: "8px",
-      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-    },
-    title: {
-      fontSize: "24px",
-      fontWeight: "bold",
-      marginBottom: "25px",
-      color: "#333",
-      textAlign: "center" as const,
-    },
-    formGroup: {
-      marginBottom: "20px",
-    },
-    label: {
-      display: "block",
-      marginBottom: "8px",
-      fontWeight: "500",
-      color: "#555",
-      fontSize: "14px",
-    },
-    input: {
-      width: "100%",
-      padding: "12px",
-      border: "2px solid #ddd",
-      borderRadius: "6px",
-      fontSize: "14px",
-      backgroundColor: "#fff",
-      color: "#333",
-      boxSizing: "border-box" as const,
-    },
-    textarea: {
-      width: "100%",
-      padding: "12px",
-      border: "2px solid #ddd",
-      borderRadius: "6px",
-      fontSize: "14px",
-      backgroundColor: "#fff",
-      color: "#333",
-      resize: "vertical" as const,
-      minHeight: "100px",
-      fontFamily: "inherit",
-      boxSizing: "border-box" as const,
-    },
-    button: {
-      width: "100%",
-      padding: "14px",
-      backgroundColor: "#2196F3",
-      color: "white",
-      border: "none",
-      borderRadius: "6px",
-      fontSize: "16px",
-      fontWeight: "600",
-      cursor: "pointer",
-      marginTop: "10px",
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      <h2 style={styles.title}>Create Role</h2>
+    <div className="p-4 max-w-md mx-auto">
+      <h2 className="text-xl font-bold mb-4">Create Role</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Role Name:</label>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block font-medium">Role Name:</label>
           <input
             type="text"
             value={role_name}
             onChange={(e) => setRoleName(e.target.value)}
-            style={styles.input}
             required
+            className="w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Role Description:</label>
+        <div>
+          <label className="block font-medium">Role Description:</label>
           <textarea
             value={role_description}
-            onChange={(e) => setRoleDesc(e.target.value)}
-            style={styles.textarea}
-            required
+            onChange={(e) => setRoleDescription(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Role Salary:</label>
+        <div>
+          <label className="block font-medium">Role Salary:</label>
           <input
             type="number"
             value={role_salary}
-            onChange={(e) => setSalary(e.target.value)}
-            style={styles.input}
-            min="10000"
+            onChange={(e) => setRoleSalary(Number(e.target.value))}
+            min={10000}
             required
+            className="w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
-        <button type="submit" style={styles.button}>
+        <button
+          type="submit"
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
           Create Role
         </button>
       </form>
+
+      {message && <p className="mt-4 text-center text-blue-600">{message}</p>}
     </div>
   );
 }

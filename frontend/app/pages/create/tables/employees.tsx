@@ -1,218 +1,291 @@
 import React, { useState, useEffect } from "react";
-
 import { domain_link } from "../../domain";
 
-export function CreateEmployees() {
-  const [first_name, setFName] = useState("");
-  const [last_name, setLName] = useState("");
-  const [phone_number, setPNum] = useState("");
+export function CreateEmployee() {
+  const [first_name, setFirstName] = useState("");
+  const [last_name, setLastName] = useState("");
+  const [phone_number, setPhoneNumber] = useState("");
   const [gender, setGender] = useState("");
-  const [role_id, setRid] = useState("");
-  const [role_name, setRoleName] = useState("");
+  const [role_id, setRoleId] = useState("");
+  const [role_name, setRoleName] = useState(""); // store selected role name for display
+  const [hire_date, setHireDate] = useState("");
   const [roles, setRoles] = useState<any[]>([]);
+  const [message, setMessage] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showRoleModal, setShowRoleModal] = useState(false);
+
+  // Fetch roles from backend
   useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch(`${domain_link}api/role/fetch`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setRoles(data);
+        }
+      } catch (err) {
+        console.error("Error fetching roles:", err);
+      }
+    };
     fetchRoles();
   }, []);
 
-  const fetchRoles = async () => {
-    try {
-      const response = await fetch("http://localhost:8002/role");
-      if (response.ok) {
-        const data = await response.json();
-        setRoles(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch roles:", error);
-    }
-  };
+  const filteredRoles = roles.filter((role) =>
+    role.role_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedRoleId = e.target.value;
-    setRid(selectedRoleId);
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5;
 
-    const selectedRole = roles.find((role) => role._id === selectedRoleId);
-    if (selectedRole) {
-      setRoleName(selectedRole.role_name);
-    }
-  };
+  const paginatedRoles = filteredRoles.slice(
+    currentPage * itemsPerPage,
+    currentPage * itemsPerPage + itemsPerPage
+  );
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const bodyData = {
-      firstname: first_name,
-      lastname: last_name,
-      phone_number: phone_number,
-      gender: gender,
-      created_at: new Date().toISOString(),
-      role_id: role_id,
-      role_name: role_name,
+      first_name,
+      last_name,
+      phone_number,
+      gender,
+      role_id,
+      hire_date: hire_date ? new Date(hire_date) : new Date(),
     };
 
     try {
-      const response = await fetch("http://localhost:8002/employee", {
+      const response = await fetch(`${domain_link}api/employee/create`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        alert("Employee created successfully!");
-        setFName("");
-        setLName("");
-        setPNum("");
+        setMessage("Employee created successfully!");
+        // Reset form
+        setFirstName("");
+        setLastName("");
+        setPhoneNumber("");
         setGender("");
-        setRid("");
+        setRoleId("");
         setRoleName("");
+        setHireDate("");
       } else {
-        const err = await response.json();
-        alert("Error: " + (err.msg || err.message));
+        setMessage(data.error || "Error creating employee");
       }
-    } catch (error) {
-      alert("Failed to connect to server");
-      console.error(error);
+    } catch (err) {
+      console.error("Error:", err);
+      setMessage("Server error while creating employee");
     }
   };
 
-  const styles = {
-    container: {
-      maxWidth: "500px",
-      margin: "40px auto",
-      padding: "30px",
-      backgroundColor: "#ffffff",
-      borderRadius: "8px",
-      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-    },
-    title: {
-      fontSize: "24px",
-      fontWeight: "bold",
-      marginBottom: "25px",
-      color: "#333",
-      textAlign: "center" as const,
-    },
-    formGroup: {
-      marginBottom: "20px",
-    },
-    label: {
-      display: "block",
-      marginBottom: "8px",
-      fontWeight: "500",
-      color: "#555",
-      fontSize: "14px",
-    },
-    input: {
-      width: "100%",
-      padding: "12px",
-      border: "2px solid #ddd",
-      borderRadius: "6px",
-      fontSize: "14px",
-      backgroundColor: "#fff",
-      color: "#333",
-      boxSizing: "border-box" as const,
-    },
-    select: {
-      width: "100%",
-      padding: "12px",
-      border: "2px solid #ddd",
-      borderRadius: "6px",
-      fontSize: "14px",
-      backgroundColor: "#fff",
-      color: "#333",
-      cursor: "pointer",
-      boxSizing: "border-box" as const,
-    },
-    button: {
-      width: "100%",
-      padding: "14px",
-      backgroundColor: "#FF9800",
-      color: "white",
-      border: "none",
-      borderRadius: "6px",
-      fontSize: "16px",
-      fontWeight: "600",
-      cursor: "pointer",
-      marginTop: "10px",
-    },
+  // Select role from modal
+  const selectRole = (id: string, name: string) => {
+    setRoleId(id);
+    setRoleName(name);
+    setShowRoleModal(false);
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.title}>Create Employee</h2>
+    <div className="p-4 max-w-md mx-auto">
+      <h2 className="text-xl font-bold mb-4">Create Employee</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>First Name:</label>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block font-medium">First Name:</label>
           <input
             type="text"
             value={first_name}
-            onChange={(e) => setFName(e.target.value)}
-            style={styles.input}
+            onChange={(e) => setFirstName(e.target.value)}
             required
+            className="w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Last Name:</label>
+        <div>
+          <label className="block font-medium">Last Name:</label>
           <input
             type="text"
             value={last_name}
-            onChange={(e) => setLName(e.target.value)}
-            style={styles.input}
+            onChange={(e) => setLastName(e.target.value)}
             required
+            className="w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Phone Number:</label>
+        <div>
+          <label className="block font-medium">Phone Number:</label>
           <input
             type="text"
             value={phone_number}
-            onChange={(e) => setPNum(e.target.value)}
-            style={styles.input}
-            maxLength={10}
-            minLength={10}
-            required
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Gender:</label>
+        <div>
+          <label className="block font-medium">Gender:</label>
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value)}
-            style={styles.select}
-            required
+            className="w-full border border-gray-300 rounded px-3 py-2"
           >
             <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
+            <option value="Male" style={{ color: "black" }}>Male</option>
+            <option value="Female" style={{ color: "black" }}>Female</option>
+            <option value="Other" style={{ color: "black" }}>Other</option>
           </select>
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Role:</label>
-          <select
-            value={role_id}
-            onChange={handleRoleChange}
-            style={styles.select}
-            required
-          >
-            <option value="">Select Role</option>
-            {roles.map((role) => (
-              <option key={role._id} value={role._id}>
-                {role.role_name} - ${role.role_salary}
-              </option>
-            ))}
-          </select>
+        <div>
+          <label className="block font-medium">Role:</label>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={role_name}
+              readOnly
+              placeholder="No role selected"
+              className="flex-1 border border-gray-300 rounded px-3 py-2 bg-gray-100"
+            />
+            <button
+              type="button"
+              onClick={() => setShowRoleModal(true)}
+              className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+            >
+              Select Role
+            </button>
+          </div>
         </div>
 
-        <button type="submit" style={styles.button}>
+        <div>
+          <label className="block font-medium">Hire Date:</label>
+          <input
+            type="date"
+            value={hire_date}
+            onChange={(e) => setHireDate(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
           Create Employee
         </button>
       </form>
+
+      {message && <p className="mt-4 text-center text-blue-600">{message}</p>}
+
+      {showRoleModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-[500px] h-[600px] max-w-full p-6 flex flex-col transition duration-300 ease-in-out">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800 text-center">
+              Select a Role
+            </h3>
+
+            {/* Search Bar */}
+            <input
+              type="text"
+              placeholder="Search roles..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(0);
+              }}
+              className="w-full border border-gray-300 rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+            />
+
+            {/* Table */}
+            <div className="border border-gray-300 overflow-hidden">
+              <table className="table-auto w-full">
+                <thead className="bg-gray-100 text-gray-700">
+                  <tr>
+                    <th className="border px-4 py-2 text-left">Role</th>
+                    <th className="border px-4 py-2 text-left">Salary</th>
+                    <th className="border px-4 py-2 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-800 align-top" style={{ height: `${5 * 48}px` }}>
+                  {paginatedRoles.map((role) => (
+                    <tr key={role._id} className="hover:bg-gray-50">
+                      <td className="border px-4 py-2">{role.role_name}</td>
+                      <td className="border px-4 py-2">{role.role_salary}</td>
+                      <td className="border px-4 py-2 text-center">
+                        <button
+                          onClick={() => selectRole(role._id, role.role_name)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                        >
+                          Select
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {/* Fill remaining rows */}
+                  {Array.from({ length: 5 - paginatedRoles.length }).map((_, idx) => (
+                    <tr key={`empty-${idx}`} className="bg-white">
+                      <td className="border px-4 py-2">&nbsp;</td>
+                      <td className="border px-4 py-2">&nbsp;</td>
+                      <td className="border px-4 py-2 text-center">&nbsp;</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Divider */}
+            <hr className="my-4 border-gray-200" />
+
+            {/* Pagination Controls */}
+            <div className="flex justify-between items-center">
+              <button
+                disabled={currentPage === 0}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+                className={`px-3 py-1 rounded transition ${
+                  currentPage === 0
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-300 hover:bg-gray-400"
+                }`}
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {currentPage + 1} of {Math.ceil(filteredRoles.length / itemsPerPage)}
+              </span>
+              <button
+                disabled={(currentPage + 1) * itemsPerPage >= filteredRoles.length}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+                className={`px-3 py-1 rounded transition ${
+                  (currentPage + 1) * itemsPerPage >= filteredRoles.length
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-300 hover:bg-gray-400"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+
+            {/* Cancel Button */}
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={() => setShowRoleModal(false)}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
