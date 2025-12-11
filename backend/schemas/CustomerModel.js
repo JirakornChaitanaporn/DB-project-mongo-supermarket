@@ -1,13 +1,13 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const CustomerSchema = new mongoose.Schema({
+export const CustomerSchema = new mongoose.Schema({
     first_name: {
         type: String,
-        required: true,
+        required: [true,"firstname is needed"],
     },
     last_name: {
         type: String,
-        required: true,
+        required: [true, "lastname is needed"],
     },
     email: {
         type: String,
@@ -27,5 +27,3 @@ const CustomerSchema = new mongoose.Schema({
         default: Date.now,
     },
 }, { collection: "customers" });
-
-module.exports = mongoose.model("Customer", CustomerSchema);

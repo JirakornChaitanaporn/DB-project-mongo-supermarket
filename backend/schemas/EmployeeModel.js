@@ -1,13 +1,13 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const EmployeeSchema = new mongoose.Schema({
+export const EmployeeSchema = new mongoose.Schema({
     first_name: {
         type: String,
-        required: true,
+        required: [true, "First name is required"],
     },
     last_name: {
         type: String,
-        required: true,
+        required: [true, "Last name is required"],
     },
     phone_number: {
         type: String,
@@ -18,12 +18,10 @@ const EmployeeSchema = new mongoose.Schema({
     role_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Role",
-        required: true,
+        required: [true, "Role ID is required"],
     },
     hire_date: {
         type: Date,
         default: Date.now,
     },
-}, { collection: "employees"});
-
-module.exports = mongoose.model("Employee", EmployeeSchema);
+}, { collection: "employees" });

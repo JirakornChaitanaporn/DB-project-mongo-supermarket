@@ -1,43 +1,16 @@
 const { createConnection } = require("../utils/mongo");
 const mongoose = require("mongoose");
-
-// Define schema
-const BillSchema = new mongoose.Schema({
-    customer_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Customer",
-        default: null
-    },
-    employee_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Employee",
-        required: true,
-    },
-    products: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "BillItem",
-        default: [],
-    }],
-    total_amount: {
-        type: Number,
-        default: 0,
-        min: 0,
-    },
-    transaction_time: {
-        type: Date,
-        default: Date.now,
-    }
-}, { collection: "bills" });
+const {BillSchema} = require("../schemas/BillModel")
 
 // Create
 const create = async (req, res) => {
   try {
     const conn = createConnection();
     const Bill = conn.model("Bill", BillSchema);
-    
+
     const billData = new Bill(req.body);
     const savedBill = await billData.save();
-    
+
     await conn.close();
     res.status(200).json(savedBill);
   } catch (error) {
@@ -51,7 +24,7 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Bill = conn.model("Bill", BillSchema);
-    
+
     // Register referenced schemas
     const CustomerSchema = new mongoose.Schema({
       first_name: { type: String, required: true },
@@ -62,7 +35,7 @@ const fetch = async (req, res) => {
       created_at: { type: Date, default: Date.now }
     }, { collection: "customers" });
     conn.model("Customer", CustomerSchema);
-    
+
     const BillItemSchema = new mongoose.Schema({
       bill_id: { type: mongoose.Schema.Types.ObjectId, ref: "Bill", required: true },
       product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
@@ -72,7 +45,7 @@ const fetch = async (req, res) => {
       final_price: { type: Number, required: true, min: 0 }
     }, { collection: "bill_items", timestamps: true });
     conn.model("BillItem", BillItemSchema);
-    
+
     const ProductSchema = new mongoose.Schema({
       product_name: { type: String, required: true },
       price: { type: Number, required: true },
@@ -82,7 +55,7 @@ const fetch = async (req, res) => {
       created_at: { type: Date, default: Date.now }
     }, { collection: "products" });
     conn.model("Product", ProductSchema);
-    
+
     const { search } = req.query;
 
     let query = {};
@@ -116,7 +89,7 @@ const update = async (req, res) => {
     const conn = createConnection();
     const Bill = conn.model("Bill", BillSchema);
     const id = req.params.id;
-    
+
     const billExist = await Bill.findOne({ _id: id });
 
     if (!billExist) {
@@ -139,7 +112,7 @@ const deleteBill = async (req, res) => {
     const conn = createConnection();
     const Bill = conn.model("Bill", BillSchema);
     const id = req.params.id;
-    
+
     const billExist = await Bill.findOne({ _id: id });
 
     if (!billExist) {
@@ -156,4 +129,20 @@ const deleteBill = async (req, res) => {
   }
 };
 
-module.exports = { fetch, create, update, deleteBill };
+const fetchById = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Bill = conn.model("Bill", BillSchema);
+    const { id } = req.params;
+
+    const bill = await Bill.findById(id);
+
+    await conn.close();
+    res.status(200).json(bill);
+  } catch (error) {
+    console.error("Fetch bill error:", error);
+    res.status(500).json({ error: "Server error while fetching bill" });
+  }
+};
+
+module.exports = { fetch, fetchById, create, update, deleteBill };

@@ -1,46 +1,16 @@
 const { createConnection } = require("../utils/mongo");
 const mongoose = require("mongoose");
-
-// Define schema
-const PromotionSchema = new mongoose.Schema({
-    promotion_name: {
-        type: String,
-        required: true,
-    },
-    product_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
-    },
-    discount_type: {
-        type: String,
-        enum: ["percent", "amount"],
-        default: "amount",
-    },
-    discount_value: {
-        type: Number,
-        required: true,
-        min: 0,
-    },
-    start_date: {
-        type: Date,
-        required: true,
-    },
-    end_date: {
-        type: Date,
-        required: true,
-    },
-}, { collection: "promotions" });
+const { PromotionSchema } = require("../schemas/PromotionModel");
 
 // Create
 const create = async (req, res) => {
   try {
     const conn = createConnection();
     const Promotion = conn.model("Promotion", PromotionSchema);
-    
+
     const promotionData = new Promotion(req.body);
     const savedPromotion = await promotionData.save();
-    
+
     await conn.close();
     res.status(200).json(savedPromotion);
   } catch (error) {
@@ -54,7 +24,7 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Promotion = conn.model("Promotion", PromotionSchema);
-    
+
     // Register referenced schemas
     const ProductSchema = new mongoose.Schema({
       product_name: { type: String, required: true },
@@ -65,7 +35,7 @@ const fetch = async (req, res) => {
       created_at: { type: Date, default: Date.now }
     }, { collection: "products" });
     conn.model("Product", ProductSchema);
-    
+
     const { search } = req.query;
 
     let query = {};
@@ -90,7 +60,7 @@ const update = async (req, res) => {
     const conn = createConnection();
     const Promotion = conn.model("Promotion", PromotionSchema);
     const id = req.params.id;
-    
+
     const promotionExist = await Promotion.findOne({ _id: id });
 
     if (!promotionExist) {
@@ -113,7 +83,7 @@ const deletePromotion = async (req, res) => {
     const conn = createConnection();
     const Promotion = conn.model("Promotion", PromotionSchema);
     const id = req.params.id;
-    
+
     const promotionExist = await Promotion.findOne({ _id: id });
 
     if (!promotionExist) {
@@ -130,4 +100,20 @@ const deletePromotion = async (req, res) => {
   }
 };
 
-module.exports = { create, fetch, update, deletePromotion };
+const fetchById = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Promotion = conn.model("Promotion", PromotionSchema);
+    const { id } = req.params;
+
+    const promotion = await Promotion.findById(id);
+
+    await conn.close();
+    res.status(200).json(promotion);
+  } catch (error) {
+    console.error("Fetch promotion error:", error);
+    res.status(500).json({ error: "Server error while fetching promotion" });
+  }
+};
+
+module.exports = { create, fetch, fetchById, update, deletePromotion };
