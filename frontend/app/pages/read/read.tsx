@@ -6,15 +6,15 @@ import DropdownButton from "../../component/dropdown/choose_button";
 import { useState } from "react";
 
 // import pages
-import {} from "./tables/bill_items";
-import {} from "./tables/bill";
-import {} from "./tables/customers";
+import { ReadBillItems } from "./tables/bill_items";
+import { ReadBill } from "./tables/bill";
+import { ReadCustomers } from "./tables/customers";
 import {} from "./tables/employees";
 import { ReadProductCategories } from "./tables/product_categories";
 import { ReadProduct } from "./tables/product";
 import {} from "./tables/promotions";
-import {} from "./tables/roles";
-import {} from "./tables/suppliers";
+import { ReadRoles } from "./tables/roles";
+import { ReadSuppliers } from "./tables/suppliers";
 
 export function ReadPage() {
 
@@ -58,9 +58,15 @@ export function ReadPage() {
               <div className="bottom-gap">
                 <DropdownButton
                   defaultLabel="Choose Topic"
-                  options={["Product",
+                  options={["Bill_Item",
+                            "Bill",
+                            "Customer",
+                            "Employee",                     
                             "Product_Categories",
-                            "Nigga",
+                            "Product",
+                            "Promotion",
+                            "Role",
+                            "Supplier"
                           ]}
                   onSelect={(topic) => handlePageChange(topic)} 
                 />
@@ -68,8 +74,15 @@ export function ReadPage() {
 
               <div className="bottom-gap">
                 {/* Condition on currentPage */}
+                {currentPage === "Bill_Item" && <ReadBillItems />}
+                {currentPage === "Bill" && <ReadBill />}
+                {currentPage === "Customer" && <ReadCustomers />}
+                {currentPage === "Employee" && <p>Please choose a topic above.</p>}
+                {currentPage === "Product_Categories" && <p>Please choose a topic above.</p>}
                 {currentPage === "Product" && <ReadProduct />}
-                {currentPage === "Product_Categories" && <ReadProductCategories />}
+                {currentPage === "Promotion" && <p>Please choose a topic above.</p>}
+                {currentPage === "Role" && <ReadRoles />}
+                {currentPage === "Supplier" && <ReadSuppliers />}
 
                 {/* None */}
                 {currentPage === "" && <p>Please choose a topic above.</p>}

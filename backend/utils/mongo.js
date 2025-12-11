@@ -1,17 +1,17 @@
-import dotenv from 'dotenv'
-import mongoose from 'mongoose';
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 
-dotenv.config()
+dotenv.config();
 
-export function getMongoErrorMsg(errors) {
-    const errMsg = {}
+function getMongoErrorMsg(errors) {
+    const errMsg = {};
     for(const key in errors) {
-        errMsg[key] = errors[key].message
+        errMsg[key] = errors[key].message;
     }
-    return errMsg
+    return errMsg;
 }
 
-export function createConnection() {
+function createConnection() {
     let conn = undefined;
     const mongoUsername = process.env.MONGO_USERNAME;
     const mongoPassword = process.env.MONGO_PASSWORD;
@@ -19,11 +19,15 @@ export function createConnection() {
     
     console.log("mongodb://" + mongoUsername + ":" + mongoPassword + "@" + mongoUrl + "?authSource=admin");
     try {
-        conn = mongoose.createConnection("mongodb://" + mongoUsername + ":" + mongoPassword + "@" + mongoUrl + "?authSource=admin")
-        
+        conn = mongoose.createConnection("mongodb://" + mongoUsername + ":" + mongoPassword + "@" + mongoUrl + "?authSource=admin");
     }
     catch(err) {
         console.log(err);
     }
     return conn;
 }
+
+module.exports = {
+    getMongoErrorMsg,
+    createConnection
+};

@@ -11,7 +11,7 @@ import {} from "./tables/bill";
 import {} from "./tables/customers";
 import {} from "./tables/employees";
 import {} from "./tables/product_categories";
-import {} from "./tables/product";
+import { DeleteProduct } from "./tables/product";
 import {} from "./tables/promotions";
 import {} from "./tables/roles";
 import {} from "./tables/suppliers";
@@ -52,15 +52,21 @@ export function DelmovePage() {
           <div className="page">
             <main className="page__main">
               <div className="page-header">
-                <h1 className="head-text">Read : {currentPage}</h1>
+                <h1 className="head-text">Delete : {currentPage}</h1>
               </div>
 
               <div className="bottom-gap">
                 <DropdownButton
                   defaultLabel="Choose Topic"
-                  options={["Product",
+                  options={["Bill_Item",
+                            "Bill",
+                            "Customer",
+                            "Employee",                     
                             "Product_Categories",
-                            "Nigga",
+                            "Product",
+                            "Promotion",
+                            "Role",
+                            "Supplier"
                           ]}
                   onSelect={(topic) => handlePageChange(topic)} 
                 />
@@ -68,8 +74,15 @@ export function DelmovePage() {
 
               <div className="bottom-gap">
                 {/* Condition on currentPage */}
-                {currentPage === "Product" && <p>Place?holder</p>}
-                {currentPage === "Product_Categories" && <p>Place?holder</p>}
+                {currentPage === "Bill_Item" && <p>Please choose a topic above.</p>}
+                {currentPage === "Bill" && <p>Please choose a topic above.</p>}
+                {currentPage === "Customer" && <p>Please choose a topic above.</p>}
+                {currentPage === "Employee" && <p>Please choose a topic above.</p>}
+                {currentPage === "Product_Categories" && <p>Please choose a topic above.</p>}
+                {currentPage === "Product" && <DeleteProduct />}
+                {currentPage === "Promotion" && <p>Please choose a topic above.</p>}
+                {currentPage === "Role" && <p>Please choose a topic above.</p>}
+                {currentPage === "Supplier" && <p>Please choose a topic above.</p>}
 
                 {/* None */}
                 {currentPage === "" && <p>Please choose a topic above.</p>}
