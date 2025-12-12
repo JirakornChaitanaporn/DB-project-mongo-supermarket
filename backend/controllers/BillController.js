@@ -83,49 +83,58 @@ const fetch = async (req, res) => {
   }
 };
 
-// Update
+// Update Bill
 const update = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const Bill = conn.model("Bill", BillSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const billExist = await Bill.findOne({ _id: id });
-
+    // Check existence
+    const billExist = await Bill.findById(id);
     if (!billExist) {
-      await conn.close();
       return res.status(404).json({ message: "Bill Not Found" });
     }
 
-    const updatedBill = await Bill.findByIdAndUpdate(id, req.body, { new: true });
-    await conn.close();
-    res.status(201).json(updatedBill);
+    // Update with validation
+    const updatedBill = await Bill.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json(updatedBill);
   } catch (error) {
     console.error("Update bill error:", error);
-    res.status(500).json({ error: "Something went wrong while updating bill" });
+    return res.status(500).json({ error: "Something went wrong while updating bill" });
+  } finally {
+    await conn.close();
   }
 };
 
-// Delete
+// Delete Bill
 const deleteBill = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const Bill = conn.model("Bill", BillSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const billExist = await Bill.findOne({ _id: id });
-
+    // Check existence
+    const billExist = await Bill.findById(id);
     if (!billExist) {
-      await conn.close();
       return res.status(404).json({ message: "Bill Not Found" });
     }
 
+    // Delete
     await Bill.findByIdAndDelete(id);
-    await conn.close();
-    res.status(201).json({ message: "Bill Deleted" });
+
+    // Success response
+    return res.status(200).json({ message: "Bill Deleted" });
   } catch (error) {
     console.error("Delete bill error:", error);
-    res.status(500).json({ error: "Something went wrong while deleting bill" });
+    return res.status(500).json({ error: "Something went wrong while deleting bill" });
+  } finally {
+    await conn.close();
   }
 };
 

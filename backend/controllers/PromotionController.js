@@ -54,49 +54,58 @@ const fetch = async (req, res) => {
   }
 };
 
-// Update
+// Update Promotion
 const update = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const Promotion = conn.model("Promotion", PromotionSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const promotionExist = await Promotion.findOne({ _id: id });
-
+    // Check existence
+    const promotionExist = await Promotion.findById(id);
     if (!promotionExist) {
-      await conn.close();
       return res.status(404).json({ message: "Promotion Not Found" });
     }
 
-    const updatedPromotion = await Promotion.findByIdAndUpdate(id, req.body, { new: true });
-    await conn.close();
-    res.status(201).json(updatedPromotion);
+    // Update with validation
+    const updatedPromotion = await Promotion.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json(updatedPromotion);
   } catch (error) {
     console.error("Update promotion error:", error);
-    res.status(500).json({ error: "Something went wrong while updating promotion" });
+    return res.status(500).json({ error: "Something went wrong while updating promotion" });
+  } finally {
+    await conn.close();
   }
 };
 
-// Delete
+// Delete Promotion
 const deletePromotion = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const Promotion = conn.model("Promotion", PromotionSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const promotionExist = await Promotion.findOne({ _id: id });
-
+    // Check existence
+    const promotionExist = await Promotion.findById(id);
     if (!promotionExist) {
-      await conn.close();
       return res.status(404).json({ message: "Promotion Not Found" });
     }
 
+    // Delete
     await Promotion.findByIdAndDelete(id);
-    await conn.close();
-    res.status(201).json({ message: "Promotion Deleted" });
+
+    // Success response
+    return res.status(200).json({ message: "Promotion Deleted" });
   } catch (error) {
     console.error("Delete promotion error:", error);
-    res.status(500).json({ error: "Something went wrong while deleting promotion" });
+    return res.status(500).json({ error: "Something went wrong while deleting promotion" });
+  } finally {
+    await conn.close();
   }
 };
 

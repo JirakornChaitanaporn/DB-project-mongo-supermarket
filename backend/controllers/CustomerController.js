@@ -72,56 +72,63 @@ const fetchById = async (req,res) => {
     }
 }
 
-// Update
+// Update Customer
 const update = async (req, res) => {
-    try {
-        const conn = createConnection();
-        const Customer = conn.model("Customer", CustomerSchema);
-        const { id } = req.params;
+  const conn = createConnection();
+  try {
+    const Customer = conn.model("Customer", CustomerSchema);
+    const { id } = req.params;
 
-        const customerExist = await Customer.findById(id);
-
-        if (!customerExist) {
-            conn.close();
-            return res.status(404).json({ message: "Customer Not Found" });
-        }
-
-        const updatedCustomer = await Customer.findByIdAndUpdate(id, req.body, {
-            new: true,
-        });
-        conn.close();
-        res.json(updatedCustomer);
-    } catch (error) {
-        console.error("Update customer error:", error);
-        res.status(500).json({
-            error: "Something went wrong while updating customer",
-        });
+    // Check existence
+    const customerExist = await Customer.findById(id);
+    if (!customerExist) {
+      return res.status(404).json({ message: "Customer Not Found" });
     }
+
+    // Update with validation
+    const updatedCustomer = await Customer.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json(updatedCustomer);
+  } catch (error) {
+    console.error("Update customer error:", error);
+    return res.status(500).json({
+      error: "Something went wrong while updating customer",
+    });
+  } finally {
+    await conn.close();
+  }
 };
 
-// Delete
+// Delete Customer
 const deleteCustomer = async (req, res) => {
-    try {
-        const conn = createConnection();
-        const Customer = conn.model("Customer", CustomerSchema);
-        const { id } = req.params;
+  const conn = createConnection();
+  try {
+    const Customer = conn.model("Customer", CustomerSchema);
+    const { id } = req.params;
 
-        const customerExist = await Customer.findById(id);
-
-        if (!customerExist) {
-            conn.close();
-            return res.status(404).json({ message: "Customer Not Found" });
-        }
-
-        await Customer.findByIdAndDelete(id);
-        conn.close();
-        res.status(204).json({ message: "Customer Deleted" });
-    } catch (error) {
-        console.error("Delete customer error:", error);
-        res.status(500).json({
-            error: "Something went wrong while deleting customer",
-        });
+    // Check existence
+    const customerExist = await Customer.findById(id);
+    if (!customerExist) {
+      return res.status(404).json({ message: "Customer Not Found" });
     }
+
+    // Delete
+    await Customer.findByIdAndDelete(id);
+
+    // Success response
+    return res.status(200).json({ message: "Customer Deleted" });
+  } catch (error) {
+    console.error("Delete customer error:", error);
+    return res.status(500).json({
+      error: "Something went wrong while deleting customer",
+    });
+  } finally {
+    await conn.close();
+  }
 };
 
 module.exports = { create, fetch, update, deleteCustomer , fetchById };

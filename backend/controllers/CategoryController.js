@@ -40,50 +40,59 @@ const fetch = async (req, res) => {
     }
 };
 
-// Update
+// Update Category
 const update = async (req, res) => {
-    try {
-        const conn = createConnection();
-        const Category = conn.model("Category", CategorySchema);
-        const id = req.params.id;
+  const conn = createConnection();
+  try {
+    const Category = conn.model("Category", CategorySchema);
+    const { id } = req.params;
 
-        const categoryExist = await Category.findOne({ _id: id });
-
-        if (!categoryExist) {
-            await conn.close();
-            return res.status(404).json({ message: "Category Not Found" });
-        }
-
-        const updatedCategory = await Category.findByIdAndUpdate(id, req.body, { new: true });
-        await conn.close();
-        res.status(201).json(updatedCategory);
-    } catch (error) {
-        console.error("Update category error:", error);
-        res.status(500).json({ error: "Something went wrong while updating category" });
+    // Check existence
+    const categoryExist = await Category.findById(id);
+    if (!categoryExist) {
+      return res.status(404).json({ message: "Category Not Found" });
     }
+
+    // Update with validation
+    const updatedCategory = await Category.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json(updatedCategory);
+  } catch (error) {
+    console.error("Update category error:", error);
+    return res.status(500).json({ error: "Something went wrong while updating category" });
+  } finally {
+    await conn.close();
+  }
 };
 
-// Delete
+// Delete Category
 const deleteCategory = async (req, res) => {
-    try {
-        const conn = createConnection();
-        const Category = conn.model("Category", CategorySchema);
-        const id = req.params.id;
+  const conn = createConnection();
+  try {
+    const Category = conn.model("Category", CategorySchema);
+    const { id } = req.params;
 
-        const categoryExist = await Category.findOne({ _id: id });
-
-        if (!categoryExist) {
-            await conn.close();
-            return res.status(404).json({ message: "Category Not Found" });
-        }
-
-        await Category.findByIdAndDelete(id);
-        await conn.close();
-        res.status(201).json({ message: "Category Deleted" });
-    } catch (error) {
-        console.error("Delete category error:", error);
-        res.status(500).json({ error: "Something went wrong while deleting category" });
+    // Check existence
+    const categoryExist = await Category.findById(id);
+    if (!categoryExist) {
+      return res.status(404).json({ message: "Category Not Found" });
     }
+
+    // Delete
+    await Category.findByIdAndDelete(id);
+
+    // Success response
+    return res.status(200).json({ message: "Category Deleted" });
+  } catch (error) {
+    console.error("Delete category error:", error);
+    return res.status(500).json({ error: "Something went wrong while deleting category" });
+  } finally {
+    await conn.close();
+  }
 };
 
 const fetchById = async (req, res) => {
