@@ -1,6 +1,7 @@
 const { createConnection } = require("../utils/mongo");
 const mongoose = require("mongoose");
-const {BillItemSchema} = require("../schemas/BillItemModel")
+const { BillItemSchema } = require("../schemas/BillItemModel")
+const { BillSchema } = require("../schemas/BillModel")
 
 
 // Create
@@ -10,9 +11,32 @@ const create = async (req, res) => {
     const BillItem = conn.model("BillItem", BillItemSchema);
 
     const billItemData = new BillItem(req.body);
+
+    const valid_err = billItemData.validateSync();
+    if (valid_err) {
+        return res.status(400).json(getMongoErrorMsg(valid_err.errors));
+    }
     const savedBillItem = await billItemData.save();
 
-    await conn.close();
+    // savedBillItem._id and to product array in bill
+    /*const Bill = conn.model("Bill", BillSchema);
+    // Check existence
+    const billExist = await Bill.findById(req.body.bill_id);
+    if (!billExist) {
+      return res.status(404).json({ message: "Bill Item Not Found" });
+    }
+
+    // Update with validation
+    const updatedBill = await Bill.findByIdAndUpdate(
+      req.body.bill_id,
+      {
+        billExist?.products?.push
+      },
+      { new: true, runValidators: true }
+    );*/
+
+
+    conn.close();
     res.status(200).json(savedBillItem);
   } catch (error) {
     console.error("Create bill item error:", error);

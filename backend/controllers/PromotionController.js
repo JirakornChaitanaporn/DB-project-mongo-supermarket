@@ -9,7 +9,14 @@ const create = async (req, res) => {
     const Promotion = conn.model("Promotion", PromotionSchema);
 
     const promotionData = new Promotion(req.body);
+
+    const valid_err = promotionData.validateSync();
+    if (valid_err) {
+        return res.status(400).json(getMongoErrorMsg(valid_err.errors));
+    }
     const savedPromotion = await promotionData.save();
+
+    
 
     await conn.close();
     res.status(200).json(savedPromotion);

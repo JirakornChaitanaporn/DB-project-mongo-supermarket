@@ -8,13 +8,20 @@ const create = async (req, res) => {
         const Category = conn.model("Category", CategorySchema);
 
         const categoryData = new Category(req.body);
+
+        const valid_err = categoryData.validateSync();
+        if (valid_err) {
+            return res.status(400).json(getMongoErrorMsg(valid_err.errors));
+        }
+
+
         const savedCategory = await categoryData.save();
 
         await conn.close();
         res.status(200).json(savedCategory);
     } catch (error) {
         console.error("Create category error:", error);
-        res.status(500).json({ error: "Something went wrong while creating category" });
+        res.status(500).json({ error: "Something went wrong while creating category, maybe this category already existed" });
     }
 };
 

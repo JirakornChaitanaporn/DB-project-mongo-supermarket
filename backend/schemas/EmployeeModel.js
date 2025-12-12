@@ -11,6 +11,7 @@ export const EmployeeSchema = new mongoose.Schema({
     },
     phone_number: {
         type: String,
+        unique:[true, "This phone number already exist"]
     },
     gender: {
         type: String,

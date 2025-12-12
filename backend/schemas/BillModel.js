@@ -11,6 +11,10 @@ export const BillSchema = new mongoose.Schema({
         ref: "Employee",
         required: [true, "Employee ID is required"],
     },
+    transaction_time: {
+        type: Date,
+        default: Date.now,
+    },
     products: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "BillItem",
@@ -21,8 +25,4 @@ export const BillSchema = new mongoose.Schema({
         default: 0,
         min: 0,
     },
-    transaction_time: {
-        type: Date,
-        default: Date.now,
-    }
 }, { collection: "bills" });

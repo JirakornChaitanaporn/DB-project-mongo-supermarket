@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 export const ProductSchema = new mongoose.Schema({
     product_name: {
         type: String,
+        unique:[true, "This product has already existed"],
         required: [true, "Product name is required"],
     },
     price: {

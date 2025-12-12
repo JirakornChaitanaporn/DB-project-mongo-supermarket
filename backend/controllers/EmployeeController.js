@@ -9,13 +9,19 @@ const create = async (req, res) => {
     const Employee = conn.model("Employee", EmployeeSchema);
 
     const employeeData = new Employee(req.body);
+
+    const valid_err = employeeData.validateSync();
+    if (valid_err) {
+        return res.status(400).json(getMongoErrorMsg(valid_err.errors));
+    }
+
     const savedEmployee = await employeeData.save();
 
     await conn.close();
     res.status(201).json(savedEmployee);
   } catch (error) {
     console.error("Create employee error:", error);
-    res.status(500).json({ error: "Something went wrong while creating employee" });
+    res.status(500).json({ error: "Something went wrong while creating employee, maybe this phone number already exist" });
   }
 };
 

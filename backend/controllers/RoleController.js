@@ -21,7 +21,7 @@ const create = async (req, res) => {
     } catch (error) {
         console.error("Create role error:", error);
         res.status(500).json({
-            error: "Something went wrong while creating role",
+            error: "Something went wrong while creating role, or this role already existed",
         });
     }
 };
