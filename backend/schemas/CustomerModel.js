@@ -11,11 +11,12 @@ export const CustomerSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        unique: true,
+        unique: [true,"this email has already existed"],
         match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
     },
     phone_number: {
         type: String,
+        unique:[true, "This phone number already exist"],
         match: [/^\+?[0-9]{7,15}$/, "Please enter a valid phone number"]
     },
     loyalty_point: {

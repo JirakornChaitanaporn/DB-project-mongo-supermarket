@@ -3,112 +3,125 @@ const { SupplierSchema } = require("../schemas/SupplierModel");
 
 // Create
 const create = async (req, res) => {
-  try {
-    const conn = createConnection();
-    const Supplier = conn.model("Supplier", SupplierSchema);
+    try {
+        const conn = createConnection();
+        const Supplier = conn.model("Supplier", SupplierSchema);
 
-    const supplierData = new Supplier(req.body);
-    const savedSupplier = await supplierData.save();
+        const supplierData = new Supplier(req.body);
+        const valid_err = supplierData.validateSync();
+        if (valid_err) {
+            conn.close();
+            return res.status(400).json(getMongoErrorMsg(valid_err.errors));
+        }
 
-    await conn.close();
-    res.status(201).json(savedSupplier);
-  } catch (error) {
-    console.error("Create supplier error:", error);
-    res.status(500).json({ error: "Something went wrong while creating supplier" });
-  }
+        const savedSupplier = await supplierData.save();
+
+        await conn.close();
+        res.status(201).json(savedSupplier);
+    } catch (error) {
+        console.error("Create supplier error:", error);
+        res.status(500).json({
+            error: "Something went wrong while creating supplier, or you use the email / phone number that already exist",
+        });
+    }
 };
 
 // Read (fetch all or search by supplier_name)
 const fetch = async (req, res) => {
-  try {
-    const conn = createConnection();
-    const Supplier = conn.model("Supplier", SupplierSchema);
+    try {
+        const conn = createConnection();
+        const Supplier = conn.model("Supplier", SupplierSchema);
 
-    const { search } = req.query;
+        const { search } = req.query;
 
-    let query = {};
-    if (search) {
-      query.supplier_name = { $regex: search, $options: "i" };
+        let query = {};
+        if (search) {
+            query.supplier_name = { $regex: search, $options: "i" };
+        }
+
+        const suppliers = await Supplier.find(query);
+        await conn.close();
+        res.status(200).json(suppliers);
+    } catch (error) {
+        console.error("Fetch suppliers error:", error);
+        res.status(500).json({
+            error: "Server error while fetching suppliers",
+        });
     }
-
-    const suppliers = await Supplier.find(query);
-    await conn.close();
-    res.status(200).json(suppliers);
-  } catch (error) {
-    console.error("Fetch suppliers error:", error);
-    res.status(500).json({ error: "Server error while fetching suppliers" });
-  }
 };
 
 // Update Supplier
 const update = async (req, res) => {
-  const conn = createConnection();
-  try {
-    const Supplier = conn.model("Supplier", SupplierSchema);
-    const { id } = req.params;
+    const conn = createConnection();
+    try {
+        const Supplier = conn.model("Supplier", SupplierSchema);
+        const { id } = req.params;
 
-    // Check existence
-    const supplierExist = await Supplier.findById(id);
-    if (!supplierExist) {
-      return res.status(404).json({ message: "Supplier Not Found" });
+        // Check existence
+        const supplierExist = await Supplier.findById(id);
+        if (!supplierExist) {
+            return res.status(404).json({ message: "Supplier Not Found" });
+        }
+
+        // Update with validation
+        const updatedSupplier = await Supplier.findByIdAndUpdate(id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+
+        return res.status(200).json(updatedSupplier);
+    } catch (error) {
+        console.error("Update supplier error:", error);
+        return res
+            .status(500)
+            .json({ error: "Something went wrong while updating supplier" });
+    } finally {
+        await conn.close();
     }
-
-    // Update with validation
-    const updatedSupplier = await Supplier.findByIdAndUpdate(
-      id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-
-    return res.status(200).json(updatedSupplier);
-  } catch (error) {
-    console.error("Update supplier error:", error);
-    return res.status(500).json({ error: "Something went wrong while updating supplier" });
-  } finally {
-    await conn.close();
-  }
 };
 
 // Delete Supplier
 const deleteSupplier = async (req, res) => {
-  const conn = createConnection();
-  try {
-    const Supplier = conn.model("Supplier", SupplierSchema);
-    const { id } = req.params;
+    const conn = createConnection();
+    try {
+        const Supplier = conn.model("Supplier", SupplierSchema);
+        const { id } = req.params;
 
-    // Check existence
-    const supplierExist = await Supplier.findById(id);
-    if (!supplierExist) {
-      return res.status(404).json({ message: "Supplier Not Found" });
+        // Check existence
+        const supplierExist = await Supplier.findById(id);
+        if (!supplierExist) {
+            return res.status(404).json({ message: "Supplier Not Found" });
+        }
+
+        // Delete
+        await Supplier.findByIdAndDelete(id);
+
+        // Success response
+        return res.status(200).json({ message: "Supplier Deleted" });
+    } catch (error) {
+        console.error("Delete supplier error:", error);
+        return res
+            .status(500)
+            .json({ error: "Something went wrong while deleting supplier" });
+    } finally {
+        await conn.close();
     }
-
-    // Delete
-    await Supplier.findByIdAndDelete(id);
-
-    // Success response
-    return res.status(200).json({ message: "Supplier Deleted" });
-  } catch (error) {
-    console.error("Delete supplier error:", error);
-    return res.status(500).json({ error: "Something went wrong while deleting supplier" });
-  } finally {
-    await conn.close();
-  }
 };
 
 const fetchById = async (req, res) => {
-  try {
-    const conn = createConnection();
-    const Supplier = conn.model("Supplier", SupplierSchema);
-    const { id } = req.params;
+    try {
+        const conn = createConnection();
+        const Supplier = conn.model("Supplier", SupplierSchema);
+        const { id } = req.params;
 
-    const supplier = await Supplier.findById(id);
+        const supplier = await Supplier.findById(id);
 
-    await conn.close();
-    res.status(200).json(supplier);
-  } catch (error) {
-    console.error("Fetch supplier error:", error);
-    res.status(500).json({ error: "Server error while fetching supplier" });
-  }
+        await conn.close();
+        res.status(200).json(supplier);
+    } catch (error) {
+        console.error("Fetch supplier error:", error);
+        res.status(500).json({ error: "Server error while fetching supplier" });
+    }
 };
 
 module.exports = { create, fetch, fetchById, update, deleteSupplier };

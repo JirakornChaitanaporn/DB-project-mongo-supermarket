@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 export const RoleSchema = new mongoose.Schema({
     role_name: {
         type: String,
+        unique:[true,"this role already exist"],
         required: [true, "role name is needed"],
     },
     role_description: {

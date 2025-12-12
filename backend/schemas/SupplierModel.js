@@ -12,9 +12,12 @@ export const SupplierSchema = new mongoose.Schema({
         },
         email: {
             type: String,
+            unique: [true, "This email already existed"],
+            required: [true, "Email is needed"]
         },
         phone: {
             type: String,
+            unique:[true, "This phone number existed already"],
             required: [true, "phone is needed"],
         },
     },

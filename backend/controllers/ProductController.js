@@ -9,13 +9,18 @@ const create = async (req, res) => {
     const Product = conn.model("Product", ProductSchema);
 
     const productData = new Product(req.body);
+
+    const valid_err = productData.validateSync();
+    if (valid_err) {
+        return res.status(400).json(getMongoErrorMsg(valid_err.errors));
+    }
     const savedProduct = await productData.save();
 
     await conn.close();
     res.status(200).json(savedProduct);
   } catch (error) {
     console.error("Create product error:", error);
-    res.status(500).json({ error: "Something went wrong while creating product" });
+    res.status(500).json({ error: "Something went wrong while creating product, maybe this product has already existed" });
   }
 };
 
