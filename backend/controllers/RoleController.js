@@ -90,29 +90,32 @@ const update = async (req, res) => {
     }
 };
 
-// Delete
+// Delete Role
 const deleteRole = async (req, res) => {
-    try {
-        const conn = createConnection();
-        const Role = conn.model("Role", RoleSchema);
-        const { id } = req.params;
+  const conn = createConnection();
+  try {
+    const Role = conn.model("Role", RoleSchema);
+    const { id } = req.params;
 
-        const roleExist = await Role.findOne(id);
-
-        if (!roleExist) {
-            conn.close();
-            return res.status(404).json({ message: "Role Not Found" });
-        }
-
-        await Role.findByIdAndDelete(id);
-        conn.close();
-        res.status(204).json({ message: "Role Deleted" });
-    } catch (error) {
-        console.error("Delete role error:", error);
-        res.status(500).json({
-            error: "Something went wrong while deleting role",
-        });
+    // Check existence
+    const roleExist = await Role.findById(id);
+    if (!roleExist) {
+      return res.status(404).json({ message: "Role Not Found" });
     }
+
+    // Delete
+    await Role.findByIdAndDelete(id);
+
+    // Success response
+    return res.status(200).json({ message: "Role Deleted" });
+  } catch (error) {
+    console.error("Delete role error:", error);
+    return res.status(500).json({
+      error: "Something went wrong while deleting role",
+    });
+  } finally {
+    await conn.close();
+  }
 };
 
 module.exports = { create, fetch, update, deleteRole, fetchById };

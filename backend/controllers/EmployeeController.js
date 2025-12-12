@@ -47,49 +47,58 @@ const fetch = async (req, res) => {
   }
 };
 
-// Update
+// Update Employee
 const update = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const Employee = conn.model("Employee", EmployeeSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const employeeExist = await Employee.findOne({ _id: id });
-
+    // Check existence
+    const employeeExist = await Employee.findById(id);
     if (!employeeExist) {
-      await conn.close();
       return res.status(404).json({ message: "Employee Not Found" });
     }
 
-    const updatedEmployee = await Employee.findByIdAndUpdate(id, req.body, { new: true });
-    await conn.close();
-    res.status(200).json(updatedEmployee);
+    // Update with validation
+    const updatedEmployee = await Employee.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json(updatedEmployee);
   } catch (error) {
     console.error("Update employee error:", error);
-    res.status(500).json({ error: "Something went wrong while updating employee" });
+    return res.status(500).json({ error: "Something went wrong while updating employee" });
+  } finally {
+    await conn.close();
   }
 };
 
-// Delete
+// Delete Employee
 const deleteEmployee = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const Employee = conn.model("Employee", EmployeeSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const employeeExist = await Employee.findOne({ _id: id });
-
+    // Check existence
+    const employeeExist = await Employee.findById(id);
     if (!employeeExist) {
-      await conn.close();
       return res.status(404).json({ message: "Employee Not Found" });
     }
 
+    // Delete
     await Employee.findByIdAndDelete(id);
-    await conn.close();
-    res.status(204).json({ message: "Employee Deleted" });
+
+    // Success response
+    return res.status(200).json({ message: "Employee Deleted" });
   } catch (error) {
     console.error("Delete employee error:", error);
-    res.status(500).json({ error: "Something went wrong while deleting employee" });
+    return res.status(500).json({ error: "Something went wrong while deleting employee" });
+  } finally {
+    await conn.close();
   }
 };
 

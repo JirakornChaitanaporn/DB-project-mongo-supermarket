@@ -67,49 +67,58 @@ const fetch = async (req, res) => {
   }
 };
 
-// Update
+// Update Product
 const update = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const Product = conn.model("Product", ProductSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
+    // Check existence
     const productExist = await Product.findById(id);
-
     if (!productExist) {
-      await conn.close();
       return res.status(404).json({ message: "Product Not Found" });
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, { new: true });
-    await conn.close();
-    res.status(201).json(updatedProduct);
+    // Update with validation
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json(updatedProduct);
   } catch (error) {
     console.error("Update product error:", error);
-    res.status(500).json({ error: "Something went wrong while updating product" });
+    return res.status(500).json({ error: "Something went wrong while updating product" });
+  } finally {
+    await conn.close();
   }
 };
 
-// Delete
+// Delete Product
 const deleteProduct = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const Product = conn.model("Product", ProductSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
+    // Check existence
     const productExist = await Product.findById(id);
-
     if (!productExist) {
-      await conn.close();
       return res.status(404).json({ message: "Product Not Found" });
     }
 
+    // Delete
     await Product.findByIdAndDelete(id);
-    await conn.close();
-    res.status(201).json({ message: "Product Deleted" });
+
+    // Success response
+    return res.status(200).json({ message: "Product Deleted" });
   } catch (error) {
     console.error("Delete product error:", error);
-    res.status(500).json({ error: "Something went wrong while deleting product" });
+    return res.status(500).json({ error: "Something went wrong while deleting product" });
+  } finally {
+    await conn.close();
   }
 };
 

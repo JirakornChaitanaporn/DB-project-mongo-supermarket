@@ -40,49 +40,58 @@ const fetch = async (req, res) => {
   }
 };
 
-// Update
+// Update Supplier
 const update = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const Supplier = conn.model("Supplier", SupplierSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const supplierExist = await Supplier.findOne({ _id: id });
-
+    // Check existence
+    const supplierExist = await Supplier.findById(id);
     if (!supplierExist) {
-      await conn.close();
       return res.status(404).json({ message: "Supplier Not Found" });
     }
 
-    const updatedSupplier = await Supplier.findByIdAndUpdate(id, req.body, { new: true });
-    await conn.close();
-    res.status(200).json(updatedSupplier);
+    // Update with validation
+    const updatedSupplier = await Supplier.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json(updatedSupplier);
   } catch (error) {
     console.error("Update supplier error:", error);
-    res.status(500).json({ error: "Something went wrong while updating supplier" });
+    return res.status(500).json({ error: "Something went wrong while updating supplier" });
+  } finally {
+    await conn.close();
   }
 };
 
-// Delete
+// Delete Supplier
 const deleteSupplier = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const Supplier = conn.model("Supplier", SupplierSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const supplierExist = await Supplier.findOne({ _id: id });
-
+    // Check existence
+    const supplierExist = await Supplier.findById(id);
     if (!supplierExist) {
-      await conn.close();
       return res.status(404).json({ message: "Supplier Not Found" });
     }
 
+    // Delete
     await Supplier.findByIdAndDelete(id);
-    await conn.close();
-    res.status(204).json({ message: "Supplier Deleted" });
+
+    // Success response
+    return res.status(200).json({ message: "Supplier Deleted" });
   } catch (error) {
     console.error("Delete supplier error:", error);
-    res.status(500).json({ error: "Something went wrong while deleting supplier" });
+    return res.status(500).json({ error: "Something went wrong while deleting supplier" });
+  } finally {
+    await conn.close();
   }
 };
 

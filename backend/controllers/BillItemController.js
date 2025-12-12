@@ -93,49 +93,58 @@ const fetch = async (req, res) => {
   }
 };
 
-// Update
+// Update Bill Item
 const update = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const BillItem = conn.model("BillItem", BillItemSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const billItemExist = await BillItem.findOne({ _id: id });
-
+    // Check existence
+    const billItemExist = await BillItem.findById(id);
     if (!billItemExist) {
-      await conn.close();
       return res.status(404).json({ message: "Bill Item Not Found" });
     }
 
-    const updatedBillItem = await BillItem.findByIdAndUpdate(id, req.body, { new: true });
-    await conn.close();
-    res.status(201).json(updatedBillItem);
+    // Update with validation
+    const updatedBillItem = await BillItem.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json(updatedBillItem);
   } catch (error) {
     console.error("Update bill item error:", error);
-    res.status(500).json({ error: "Something went wrong while updating bill item" });
+    return res.status(500).json({ error: "Something went wrong while updating bill item" });
+  } finally {
+    await conn.close();
   }
 };
 
-// Delete
+// Delete Bill Item
 const deleteBillItem = async (req, res) => {
+  const conn = createConnection();
   try {
-    const conn = createConnection();
     const BillItem = conn.model("BillItem", BillItemSchema);
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const billItemExist = await BillItem.findOne({ _id: id });
-
+    // Check existence
+    const billItemExist = await BillItem.findById(id);
     if (!billItemExist) {
-      await conn.close();
       return res.status(404).json({ message: "Bill Item Not Found" });
     }
 
+    // Delete
     await BillItem.findByIdAndDelete(id);
-    await conn.close();
-    res.status(201).json({ message: "Bill Item Deleted" });
+
+    // Success response
+    return res.status(200).json({ message: "Bill Item Deleted" });
   } catch (error) {
     console.error("Delete bill item error:", error);
-    res.status(500).json({ error: "Something went wrong while deleting bill item" });
+    return res.status(500).json({ error: "Something went wrong while deleting bill item" });
+  } finally {
+    await conn.close();
   }
 };
 
