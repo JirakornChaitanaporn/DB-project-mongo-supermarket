@@ -20,6 +20,7 @@ export default function CreatePromotion() {
       try {
         const response = await fetch(`${domain_link}api/product/fetch`);
         const data = await response.json();
+        console.log()
 
         if (response.ok) {
           setProducts(Array.isArray(data) ? data : data.products || []);
