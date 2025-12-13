@@ -1,5 +1,5 @@
 const { createConnection } = require("../utils/mongo");
-const {ProductSchema} = require("../schemas/ProductModel")
+const { ProductSchema } = require("../schemas/ProductModel")
 const { SupplierSchema } = require("../schemas/SupplierModel");
 const { CategorySchema } = require("../schemas/CategoryModel");
 

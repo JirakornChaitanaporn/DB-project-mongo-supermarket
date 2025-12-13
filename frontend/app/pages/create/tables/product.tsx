@@ -22,7 +22,6 @@ export default function CreateProduct() {
 
         const supplierData = await supplierRes.json();
         const categoryData = await categoryRes.json();
-        console.log(categoryData)
 
         if (supplierRes.ok) {
           setSuppliers(Array.isArray(supplierData) ? supplierData : supplierData.suppliers || []);
