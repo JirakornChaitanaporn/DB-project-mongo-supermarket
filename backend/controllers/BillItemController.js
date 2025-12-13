@@ -1,7 +1,6 @@
 const { createConnection } = require("../utils/mongo");
 const mongoose = require("mongoose");
-const { BillItemSchema } = require("../schemas/BillItemModel")
-const { BillSchema } = require("../schemas/BillModel")
+const {BillItemSchema} = require("../schemas/BillItemModel")
 
 
 // Create
@@ -11,32 +10,9 @@ const create = async (req, res) => {
     const BillItem = conn.model("BillItem", BillItemSchema);
 
     const billItemData = new BillItem(req.body);
-
-    const valid_err = billItemData.validateSync();
-    if (valid_err) {
-        return res.status(400).json(getMongoErrorMsg(valid_err.errors));
-    }
     const savedBillItem = await billItemData.save();
 
-    // savedBillItem._id and to product array in bill
-    /*const Bill = conn.model("Bill", BillSchema);
-    // Check existence
-    const billExist = await Bill.findById(req.body.bill_id);
-    if (!billExist) {
-      return res.status(404).json({ message: "Bill Item Not Found" });
-    }
-
-    // Update with validation
-    const updatedBill = await Bill.findByIdAndUpdate(
-      req.body.bill_id,
-      {
-        billExist?.products?.push
-      },
-      { new: true, runValidators: true }
-    );*/
-
-
-    conn.close();
+    await conn.close();
     res.status(200).json(savedBillItem);
   } catch (error) {
     console.error("Create bill item error:", error);
@@ -49,71 +25,35 @@ const fetch = async (req, res) => {
     const conn = createConnection();
     const BillItem = conn.model("BillItem", BillItemSchema);
 
-    // Register referenced schemas
-    const BillSchema = new mongoose.Schema({
-      customer_id: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", default: null },
-      employee_id: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },
-      products: [{ type: mongoose.Schema.Types.ObjectId, ref: "BillItem", default: [] }],
-      total_amount: { type: Number, default: 0, min: 0 },
-      transaction_time: { type: Date, default: Date.now }
-    }, { collection: "bills" });
-    conn.model("Bill", BillSchema);
+    const { search, page = 1, limit = 10 } = req.query;
 
-    const ProductSchema = new mongoose.Schema({
-      product_name: { type: String, required: true },
-      price: { type: Number, required: true },
-      supplier_id: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier", required: true },
-      category_id: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
-      quantity: { type: Number, required: true },
-      created_at: { type: Date, default: Date.now }
-    }, { collection: "products" });
-    conn.model("Product", ProductSchema);
-
-    const PromotionSchema = new mongoose.Schema({
-      promotion_name: { type: String, required: true },
-      product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
-      discount_type: { type: String, enum: ["percent", "amount"], default: "amount" },
-      discount_value: { type: Number, required: true, min: 0 },
-      start_date: { type: Date, required: true },
-      end_date: { type: Date, required: true }
-    }, { collection: "promotions" });
-    conn.model("Promotion", PromotionSchema);
-
-    const { bill_id, product_id, limit = 10, skip = 0 } = req.query;
-
+    // Build query
     let query = {};
-    if (bill_id) {
-      if (!mongoose.Types.ObjectId.isValid(bill_id)) {
-        await conn.close();
-        return res.status(400).json({ error: "Invalid bill_id" });
-      }
-      query.bill_id = bill_id;
-    }
-    if (product_id) {
-      if (!mongoose.Types.ObjectId.isValid(product_id)) {
-        await conn.close();
-        return res.status(400).json({ error: "Invalid product_id" });
-      }
-      query.product_id = product_id;
+    if (search) {
+      // Example: search by product_id or bill_id string
+      // (You may want to adjust this to search by populated product name)
+      query.$or = [
+        { bill_id: { $regex: search, $options: "i" } },
+        { product_id: { $regex: search, $options: "i" } },
+      ];
     }
 
+    // Apply pagination
     const billItems = await BillItem.find(query)
-      .populate("bill_id", "total_amount transaction_time")
-      .populate("product_id", "product_name price")
-      .populate("promotion", "promotion_name discount_type discount_value")
-      .skip(parseInt(skip))
-      .limit(parseInt(limit));
+      .populate("bill_id")       // include bill details
+      .populate("product_id")    // include product details
+      .populate("promotion")     // include promotion details
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
 
-    if (!billItems.length) {
-      await conn.close();
-      return res.status(404).json({ message: "No bill items found" });
-    }
+    // Count total matching documents
+    const total = await BillItem.countDocuments(query);
 
-    await conn.close();
-    res.status(200).json(billItems);
+    conn.close();
+    res.status(200).json({ billItems, total });
   } catch (error) {
     console.error("Fetch bill items error:", error);
-    res.status(500).json({ error: error.message || "Server error while fetching bill items" });
+    res.status(500).json({ error: "Server error while fetching bill items" });
   }
 };
 
