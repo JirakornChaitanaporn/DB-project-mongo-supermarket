@@ -5,19 +5,28 @@ export default function ReadSuppliers() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [total, setTotal] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Fetch suppliers from backend
+  // Fetch suppliers with server-side pagination
   const fetchSuppliers = async () => {
     setLoading(true);
     setError("");
+
+    const queryParams = new URLSearchParams();
+    if (searchTerm) {
+      queryParams.append("search", searchTerm);
+    }
+    queryParams.append("page", currentPage.toString());
+    queryParams.append("limit", rowsPerPage.toString());
+
     try {
-      const response = await fetch(`${domain_link}api/supplier/fetch`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `${domain_link}api/supplier/fetch?${queryParams.toString()}`,
+        { method: "GET", headers: { "Content-Type": "application/json" } }
+      );
 
       if (!response.ok) {
         const errData = await response.json();
@@ -25,7 +34,8 @@ export default function ReadSuppliers() {
       }
 
       const data = await response.json();
-      setSuppliers(data);
+      setSuppliers(data.suppliers); // only current page
+      setTotal(data.total); // total count from backend
     } catch (err: any) {
       console.error("Error fetching suppliers:", err);
       setError(err.message);
@@ -37,46 +47,49 @@ export default function ReadSuppliers() {
 
   useEffect(() => {
     fetchSuppliers();
-  }, []);
+  }, [currentPage, rowsPerPage]);
+  // Can add searchTerm in useEffect.
 
-  // Filter roles by name only
-  const filteredSuppliers = suppliers.filter((suppliers) =>
-    suppliers.supplier_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchSuppliers();
+  };
 
-  // Pagination logic
-  const indexOfLastSupplier = currentPage * rowsPerPage;
-  const indexOfFirstSupplier = indexOfLastSupplier - rowsPerPage;
-  const currentSuppliers = filteredSuppliers.slice(
-    indexOfFirstSupplier,
-    indexOfLastSupplier
-  );
-  const totalPages = Math.ceil(suppliers.length / rowsPerPage);
+  const totalPages = Math.ceil(total / rowsPerPage);
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Suppliers</h2>
+      <h2 className="text-2xl font-bold mb-6">Suppliers List</h2>
 
-      {/* Search Bar */}
-      <input
-        type="text"
-        placeholder="Search by role name..."
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setCurrentPage(1); // reset to first page when searching
-        }}
-        className="mb-4 w-full px-4 py-2 border rounded"
-      />
+      {/* Search bar */}
+      <form
+        onSubmit={handleSearch}
+        className="mb-6 flex flex-wrap gap-2 items-center"
+      >
+        <input
+          type="text"
+          placeholder="Search by supplier name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="flex-1 min-w-[200px] border border-gray-300 rounded px-3 py-2"
+        />
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Find
+        </button>
+      </form>
 
       {loading && <p>Loading suppliers...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {!loading && !error && (
         <div className="overflow-x-auto">
-          <table className="table-auto border-collapse border border-gray-300 w-full">
+          <table className="table-auto border-collapse border border-gray-300 w-full text-black">
             <thead>
-              <tr className="bg-gray-100 text-left">
+              <tr className="bg-gray-300 text-left">
                 <th className="border px-4 py-2">Supplier Name</th>
                 <th className="border px-4 py-2">Contact Person</th>
                 <th className="border px-4 py-2">Phone</th>
@@ -85,9 +98,9 @@ export default function ReadSuppliers() {
               </tr>
             </thead>
             <tbody>
-              {currentSuppliers.length > 0 ? (
-                currentSuppliers.map((supplier) => (
-                  <tr key={supplier._id}>
+              {suppliers.length > 0 ? (
+                suppliers.map((supplier) => (
+                  <tr key={supplier._id} className="bg-gray-100 text-left">
                     <td className="border px-4 py-2">
                       {supplier.supplier_name}
                     </td>
@@ -117,7 +130,7 @@ export default function ReadSuppliers() {
                 <tr>
                   <td
                     colSpan={5}
-                    className="border px-4 py-2 text-center text-gray-500"
+                    className="border px-4 py-2 text-center text-gray-500 text-black"
                   >
                     No suppliers found
                   </td>
@@ -145,6 +158,23 @@ export default function ReadSuppliers() {
             >
               Next
             </button>
+          </div>
+          {/* Rows per page selector */}
+          <div className="mt-4 flex items-center gap-2">
+            <label className="font-medium">Rows per page:</label>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1); // reset to first page when changing rows
+              }}
+              className="border border-gray-300 rounded px-2 py-1 text-black"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
           </div>
         </div>
       )}

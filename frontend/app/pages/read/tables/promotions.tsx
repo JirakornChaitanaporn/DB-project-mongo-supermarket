@@ -5,27 +5,27 @@ export default function ReadPromotions() {
   const [promotions, setPromotions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [total, setTotal] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Fetch promotions from backend
+  // Fetch promotions with server-side pagination
   const fetchPromotions = async () => {
     setLoading(true);
     setError("");
 
     const queryParams = new URLSearchParams();
     if (searchTerm) {
-      queryParams.append("search", searchTerm); // backend supports search by promotion_name
+      queryParams.append("search", searchTerm);
     }
+    queryParams.append("page", currentPage.toString());
+    queryParams.append("limit", rowsPerPage.toString());
 
     try {
       const response = await fetch(
         `${domain_link}api/promotion/fetch?${queryParams.toString()}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
+        { method: "GET", headers: { "Content-Type": "application/json" } }
       );
 
       if (!response.ok) {
@@ -34,7 +34,8 @@ export default function ReadPromotions() {
       }
 
       const data = await response.json();
-      setPromotions(data);
+      setPromotions(data.promotions); // only current page
+      setTotal(data.total); // total count from backend
     } catch (err: any) {
       console.error("Error fetching promotions:", err);
       setError(err.message);
@@ -46,7 +47,8 @@ export default function ReadPromotions() {
 
   useEffect(() => {
     fetchPromotions();
-  }, []);
+  }, [currentPage, rowsPerPage]);
+  // Can add searchTerm in useEffect.
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,18 +56,11 @@ export default function ReadPromotions() {
     fetchPromotions();
   };
 
-  // Pagination logic
-  const indexOfLastPromotion = currentPage * rowsPerPage;
-  const indexOfFirstPromotion = indexOfLastPromotion - rowsPerPage;
-  const currentPromotions = promotions.slice(
-    indexOfFirstPromotion,
-    indexOfLastPromotion
-  );
-  const totalPages = Math.ceil(promotions.length / rowsPerPage);
+  const totalPages = Math.ceil(total / rowsPerPage);
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Promotions</h2>
+      <h2 className="text-2xl font-bold mb-6">Promotions List</h2>
 
       {/* Search bar */}
       <form
@@ -92,37 +87,34 @@ export default function ReadPromotions() {
 
       {!loading && !error && (
         <div className="overflow-x-auto">
-          <table className="table-auto border-collapse border border-gray-300 w-full">
+          <table className="table-auto border-collapse border border-gray-300 w-full text-black">
             <thead>
-              <tr className="bg-gray-100 text-left">
+              <tr className="bg-gray-300 text-left">
                 <th className="border px-4 py-2">Promotion Name</th>
                 <th className="border px-4 py-2">Product</th>
-                <th className="border px-4 py-2">Original Price</th>
-                <th className="border px-4 py-2">Discount</th>
+                <th className="border px-4 py-2">Discount Type</th>
+                <th className="border px-4 py-2">Discount Value</th>
                 <th className="border px-4 py-2">Start Date</th>
                 <th className="border px-4 py-2">End Date</th>
-                <th className="border px-4 py-2">Description</th>
               </tr>
             </thead>
             <tbody>
-              {currentPromotions.length > 0 ? (
-                currentPromotions.map((promotion) => (
-                  <tr key={promotion._id}>
+              {promotions.length > 0 ? (
+                promotions.map((promotion) => (
+                  <tr key={promotion._id} className="bg-gray-100 text-left">
                     <td className="border px-4 py-2">
                       {promotion.promotion_name}
                     </td>
                     <td className="border px-4 py-2">
                       {promotion.product_id?.product_name || "—"}
                     </td>
-                    <td className="border px-4 py-2 text-right">
-                      {promotion.product_id?.price
-                        ? `$${promotion.product_id.price.toFixed(2)}`
-                        : "—"}
+                    <td className="border px-4 py-2">
+                      {promotion.discount_type || "—"}
                     </td>
                     <td className="border px-4 py-2 text-right">
-                      {promotion.discount_percentage
-                        ? `${promotion.discount_percentage}%`
-                        : "—"}
+                      {promotion.discount_type === "percent"
+                        ? `${promotion.discount_value}%`
+                        : `$${promotion.discount_value.toFixed(2)}`}
                     </td>
                     <td className="border px-4 py-2">
                       {promotion.start_date
@@ -134,16 +126,13 @@ export default function ReadPromotions() {
                         ? new Date(promotion.end_date).toLocaleDateString()
                         : "—"}
                     </td>
-                    <td className="border px-4 py-2">
-                      {promotion.description || "—"}
-                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td
-                    colSpan={7}
-                    className="border px-4 py-2 text-center text-gray-500"
+                    colSpan={6}
+                    className="border px-4 py-2 text-center text-gray-500 text-black"
                   >
                     No promotions found
                   </td>
@@ -171,6 +160,23 @@ export default function ReadPromotions() {
             >
               Next
             </button>
+          </div>
+          {/* Rows per page selector */}
+          <div className="mt-4 flex items-center gap-2">
+            <label className="font-medium text-black">Rows per page:</label>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1); // reset to first page when changing rows
+              }}
+              className="border border-gray-300 rounded px-2 py-1 text-black"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
           </div>
         </div>
       )}

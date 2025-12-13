@@ -28,7 +28,7 @@ export default function CreateProduct() {
           setSuppliers(Array.isArray(supplierData) ? supplierData : supplierData.suppliers || []);
         }
         if (categoryRes.ok) {
-          setCategories(Array.isArray(categoryData) ? categoryData : categoryData.categories || []);
+          setCategories(Array.isArray(categoryData) ? categoryData : categoryData.category || []);
         }
       } catch (err) {
         console.error("Error fetching suppliers/categories:", err);
