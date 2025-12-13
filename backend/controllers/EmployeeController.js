@@ -9,19 +9,13 @@ const create = async (req, res) => {
     const Employee = conn.model("Employee", EmployeeSchema);
 
     const employeeData = new Employee(req.body);
-
-    const valid_err = employeeData.validateSync();
-    if (valid_err) {
-        return res.status(400).json(getMongoErrorMsg(valid_err.errors));
-    }
-
     const savedEmployee = await employeeData.save();
 
     await conn.close();
     res.status(201).json(savedEmployee);
   } catch (error) {
     console.error("Create employee error:", error);
-    res.status(500).json({ error: "Something went wrong while creating employee, maybe this phone number already exist" });
+    res.status(500).json({ error: "Something went wrong while creating employee" });
   }
 };
 
@@ -30,23 +24,30 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Employee = conn.model("Employee", EmployeeSchema);
-    const Role = conn.model("Role", RoleSchema);
 
-    const { search } = req.query;
+    const { search, page = 1, limit = 10 } = req.query;
 
+    // Build query
     let query = {};
     if (search) {
+      // Search by first_name or last_name
       query.$or = [
         { first_name: { $regex: search, $options: "i" } },
-        { last_name: { $regex: search, $options: "i" } }
+        { last_name: { $regex: search, $options: "i" } },
       ];
     }
 
+    // Apply pagination
     const employees = await Employee.find(query)
-      .populate("role_id", "role_name role_salary");
+      .populate("role_id") // include role details
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
 
-    await conn.close();
-    res.status(200).json(employees);
+    // Count total matching documents
+    const total = await Employee.countDocuments(query);
+
+    conn.close();
+    res.status(200).json({ employees, total });
   } catch (error) {
     console.error("Fetch employees error:", error);
     res.status(500).json({ error: "Server error while fetching employees" });

@@ -9,14 +9,7 @@ const create = async (req, res) => {
     const Promotion = conn.model("Promotion", PromotionSchema);
 
     const promotionData = new Promotion(req.body);
-
-    const valid_err = promotionData.validateSync();
-    if (valid_err) {
-        return res.status(400).json(getMongoErrorMsg(valid_err.errors));
-    }
     const savedPromotion = await promotionData.save();
-
-    
 
     await conn.close();
     res.status(200).json(savedPromotion);
@@ -32,29 +25,25 @@ const fetch = async (req, res) => {
     const conn = createConnection();
     const Promotion = conn.model("Promotion", PromotionSchema);
 
-    // Register referenced schemas
-    const ProductSchema = new mongoose.Schema({
-      product_name: { type: String, required: true },
-      price: { type: Number, required: true },
-      supplier_id: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier", required: true },
-      category_id: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
-      quantity: { type: Number, required: true },
-      created_at: { type: Date, default: Date.now }
-    }, { collection: "products" });
-    conn.model("Product", ProductSchema);
+    const { search, page = 1, limit = 10 } = req.query;
 
-    const { search } = req.query;
-
+    // Build query
     let query = {};
     if (search) {
       query.promotion_name = { $regex: search, $options: "i" };
     }
 
+    // Apply pagination
     const promotions = await Promotion.find(query)
-      .populate("product_id", "product_name price");
+      .populate("product_id") // optional: populate product details
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
 
-    await conn.close();
-    res.status(200).json(promotions);
+    // Count total matching documents
+    const total = await Promotion.countDocuments(query);
+
+    conn.close();
+    res.status(200).json({ promotions, total });
   } catch (error) {
     console.error("Fetch promotions error:", error);
     res.status(500).json({ error: "Server error while fetching promotions" });
