@@ -5,8 +5,8 @@ export default function ReadProductCategories() {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const rowsPerPage = 10;
 
   // Fetch categories from backend
@@ -16,7 +16,7 @@ export default function ReadProductCategories() {
 
     const queryParams = new URLSearchParams();
     if (searchTerm) {
-      queryParams.append("search", searchTerm); // backend supports search by category_name
+      queryParams.append("search", searchTerm);
     }
 
     try {
@@ -34,7 +34,26 @@ export default function ReadProductCategories() {
       }
 
       const data = await response.json();
-      setCategories(data);
+      console.log("=== CATEGORY API DEBUG ===");
+      console.log("Raw API Response:", data);
+      console.log("Type:", typeof data);
+      console.log("Is Array?", Array.isArray(data));
+      console.log("Keys:", data ? Object.keys(data) : "no keys");
+      console.log("Data length:", data?.length);
+      console.log("========================");
+
+      // Ensure we always set an array
+      if (Array.isArray(data)) {
+        setCategories(data);
+      } else if (data && typeof data === "object") {
+        // Check for common response formats - NOTE: backend returns 'category' not 'categories'
+        const cats =
+          data.category || data.categories || data.data || data.result || [];
+        console.log("Extracted categories:", cats);
+        setCategories(cats);
+      } else {
+        setCategories([]);
+      }
     } catch (err: any) {
       console.error("Error fetching categories:", err);
       setError(err.message);
@@ -92,9 +111,12 @@ export default function ReadProductCategories() {
 
       {!loading && !error && (
         <div className="overflow-x-auto">
-          <table className="table-auto border-collapse border border-gray-300 w-full">
+          <p className="mb-2 text-sm text-gray-600">
+            Total categories: {categories.length}
+          </p>
+          <table className="table-auto border-collapse border border-gray-300 w-full text-black">
             <thead>
-              <tr className="bg-gray-100 text-left">
+              <tr className="bg-gray-300 text-left">
                 <th className="border px-4 py-2">Category Name</th>
                 <th className="border px-4 py-2">Description</th>
               </tr>
@@ -102,7 +124,7 @@ export default function ReadProductCategories() {
             <tbody>
               {currentCategories.length > 0 ? (
                 currentCategories.map((category) => (
-                  <tr key={category._id}>
+                  <tr key={category._id} className="bg-gray-100 text-left">
                     <td className="border px-4 py-2">
                       {category.category_name}
                     </td>
@@ -115,7 +137,7 @@ export default function ReadProductCategories() {
                 <tr>
                   <td
                     colSpan={2}
-                    className="border px-4 py-2 text-center text-gray-500"
+                    className="border px-4 py-2 text-center text-gray-500 text-black"
                   >
                     No categories found
                   </td>
