@@ -24,7 +24,8 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Employee = conn.model("Employee", EmployeeSchema);
-
+    const Role = conn.model("Role", RoleSchema);
+    
     const { search, page = 1, limit = 10 } = req.query;
 
     // Build query

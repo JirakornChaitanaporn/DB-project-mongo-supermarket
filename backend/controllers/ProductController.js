@@ -1,6 +1,7 @@
 const { createConnection } = require("../utils/mongo");
-const mongoose = require("mongoose");
 const {ProductSchema} = require("../schemas/ProductModel")
+const { SupplierSchema } = require("../schemas/SupplierModel");
+const { CategorySchema } = require("../schemas/CategoryModel");
 
 // Create
 const create = async (req, res) => {
@@ -24,6 +25,8 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Product = conn.model("Product", ProductSchema);
+    const Supplier = conn.model("Supplier", SupplierSchema);
+    const Category = conn.model("Category", CategorySchema);
 
     const { search, page = 1, limit = 10 } = req.query;
 
