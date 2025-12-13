@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 
-export function ReadCustomers() {
+export default function ReadCustomers() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

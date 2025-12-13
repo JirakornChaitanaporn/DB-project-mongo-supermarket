@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 
-export function CreateBill() {
+export default function CreateBill() {
   const [customer_id, setCustomerId] = useState<string | null>(null);
   const [employee_id, setEmployeeId] = useState("");
   const [customers, setCustomers] = useState<any[]>([]);
@@ -17,14 +17,18 @@ export function CreateBill() {
           fetch(`${domain_link}api/employee/fetch`)
         ]);
 
-        if (custRes.ok) setCustomers(await custRes.json());
-        if (empRes.ok) setEmployees(await empRes.json());
+        const custData = await custRes.json();
+        const empData = await empRes.json();
+
+        if (custRes.ok) setCustomers(Array.isArray(custData) ? custData : custData.customers || []);
+        if (empRes.ok) setEmployees(Array.isArray(empData) ? empData : empData.employees || []);
       } catch (err) {
         console.error("Error fetching dropdown data:", err);
       }
     };
     fetchData();
   }, []);
+
 
   // Submit bill
   const handleSubmit = async (e: React.FormEvent) => {

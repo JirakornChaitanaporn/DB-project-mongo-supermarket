@@ -1,11 +1,10 @@
 import "./dropdown.css"
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router";
 
 interface DropdownButtonProps {
-  defaultLabel: string; // initial label
-  options: string[];    // list of topics
-  onSelect?: (value: string) => void; // optional callback
+  defaultLabel: string;
+  options: string[];
+  onSelect?: (value: string) => void;
 }
 
 const DropdownButton: React.FC<DropdownButtonProps> = ({ defaultLabel, options, onSelect }) => {
@@ -17,6 +16,18 @@ const DropdownButton: React.FC<DropdownButtonProps> = ({ defaultLabel, options, 
     setOpen(false);
     if (onSelect) onSelect(option);
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest(".dropdown-button")) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
     <div className="dropdown-button">

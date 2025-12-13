@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 
-export function ReadSuppliers() {
+export default function ReadSuppliers() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -13,20 +13,11 @@ export function ReadSuppliers() {
   const fetchSuppliers = async () => {
     setLoading(true);
     setError("");
-
-    const queryParams = new URLSearchParams();
-    if (searchTerm) {
-      queryParams.append("search", searchTerm); // backend supports search by supplier_name
-    }
-
     try {
-      const response = await fetch(
-        `${domain_link}api/supplier/fetch?${queryParams.toString()}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await fetch(`${domain_link}api/supplier/fetch`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (!response.ok) {
         const errData = await response.json();
@@ -48,16 +39,15 @@ export function ReadSuppliers() {
     fetchSuppliers();
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentPage(1);
-    fetchSuppliers();
-  };
+  // Filter roles by name only
+  const filteredSuppliers = suppliers.filter((suppliers) =>
+    suppliers.supplier_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Pagination logic
   const indexOfLastSupplier = currentPage * rowsPerPage;
   const indexOfFirstSupplier = indexOfLastSupplier - rowsPerPage;
-  const currentSuppliers = suppliers.slice(
+  const currentSuppliers = filteredSuppliers.slice(
     indexOfFirstSupplier,
     indexOfLastSupplier
   );
@@ -67,25 +57,17 @@ export function ReadSuppliers() {
     <div className="p-6 max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Suppliers</h2>
 
-      {/* Search bar */}
-      <form
-        onSubmit={handleSearch}
-        className="mb-6 flex flex-wrap gap-2 items-center"
-      >
-        <input
-          type="text"
-          placeholder="Search by supplier name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 min-w-[200px] border border-gray-300 rounded px-3 py-2"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Find
-        </button>
-      </form>
+      {/* Search Bar */}
+      <input
+        type="text"
+        placeholder="Search by role name..."
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setCurrentPage(1); // reset to first page when searching
+        }}
+        className="mb-4 w-full px-4 py-2 border rounded"
+      />
 
       {loading && <p>Loading suppliers...</p>}
       {error && <p className="text-red-500">{error}</p>}

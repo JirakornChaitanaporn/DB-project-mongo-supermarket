@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { domain_link } from "../../domain";
 
-export function CreateSupplier() {
+export default function CreateSupplier() {
   const [supplier_name, setSupplierName] = useState("");
   const [person, setPerson] = useState("");
   const [email, setEmail] = useState("");

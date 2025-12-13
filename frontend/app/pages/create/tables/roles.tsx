@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { domain_link } from "../../domain";
 
-export function CreateRole() {
+export default function CreateRole() {
   const [role_name, setRoleName] = useState("");
   const [role_description, setRoleDescription] = useState("");
   const [role_salary, setRoleSalary] = useState(10000);

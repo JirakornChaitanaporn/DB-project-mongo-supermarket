@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 
-export function CreateProduct() {
+export default function CreateProduct() {
   const [product_name, setProductName] = useState("");
   const [price, setPrice] = useState(0);
   const [supplier_id, setSupplierId] = useState("");
@@ -22,15 +22,21 @@ export function CreateProduct() {
 
         const supplierData = await supplierRes.json();
         const categoryData = await categoryRes.json();
+        console.log(categoryData)
 
-        if (supplierRes.ok) setSuppliers(supplierData);
-        if (categoryRes.ok) setCategories(categoryData);
+        if (supplierRes.ok) {
+          setSuppliers(Array.isArray(supplierData) ? supplierData : supplierData.suppliers || []);
+        }
+        if (categoryRes.ok) {
+          setCategories(Array.isArray(categoryData) ? categoryData : categoryData.categories || []);
+        }
       } catch (err) {
         console.error("Error fetching suppliers/categories:", err);
       }
     };
     fetchData();
   }, []);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

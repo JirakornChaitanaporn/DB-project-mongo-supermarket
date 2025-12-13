@@ -27,7 +27,7 @@ interface Promotion {
   end_date: string;
 }
 
-export function CreateBillItem() {
+export default function CreateBillItem() {
   const [bill_id, setBillId] = useState<string>("");
   const [product_id, setProductId] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
@@ -47,15 +47,20 @@ export function CreateBillItem() {
           fetch(`${domain_link}api/promotion/fetch`)
         ]);
 
-        if (billRes.ok) setBills(await billRes.json());
-        if (prodRes.ok) setProducts(await prodRes.json());
-        if (promoRes.ok) setPromotions(await promoRes.json());
+        const billData = await billRes.json();
+        const prodData = await prodRes.json();
+        const promoData = await promoRes.json();
+
+        if (billRes.ok) setBills(billData.bills || billData || []);
+        if (prodRes.ok) setProducts(prodData.products || prodData || []);
+        if (promoRes.ok) setPromotions(promoData.promotions || promoData || []);
       } catch (err) {
         console.error("Error fetching dropdown data:", err);
       }
     };
     fetchData();
   }, []);
+
 
   // Calculate final price live
   const calculateFinalPrice = (): number => {

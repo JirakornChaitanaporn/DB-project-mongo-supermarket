@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 
-export function ReadBillItems() {
+export default function ReadBillItems() {
   const [billItems, setBillItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
