@@ -5,27 +5,27 @@ export default function ReadCustomers() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [total, setTotal] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Fetch customers from backend
+  // Fetch customers with server-side pagination
   const fetchCustomers = async () => {
     setLoading(true);
     setError("");
 
     const queryParams = new URLSearchParams();
     if (searchTerm) {
-      queryParams.append("search", searchTerm); // backend should support search by name
+      queryParams.append("search", searchTerm);
     }
+    queryParams.append("page", currentPage.toString());
+    queryParams.append("limit", rowsPerPage.toString());
 
     try {
       const response = await fetch(
         `${domain_link}api/customer/fetch?${queryParams.toString()}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
+        { method: "GET", headers: { "Content-Type": "application/json" } }
       );
 
       if (!response.ok) {
@@ -34,11 +34,26 @@ export default function ReadCustomers() {
       }
 
       const data = await response.json();
-      setCustomers(data);
+
+      // Handle different response formats
+      if (data.customers && data.total !== undefined) {
+        // Server-side pagination format: { customers: [...], total: 150 }
+        setCustomers(data.customers || []);
+        setTotal(data.total || 0);
+      } else if (Array.isArray(data)) {
+        // Simple array format: [...]
+        setCustomers(data);
+        setTotal(data.length);
+      } else {
+        // Fallback
+        setCustomers([]);
+        setTotal(0);
+      }
     } catch (err: any) {
       console.error("Error fetching customers:", err);
       setError(err.message);
       setCustomers([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -46,7 +61,8 @@ export default function ReadCustomers() {
 
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [currentPage, rowsPerPage]);
+  // Can add searchTerm in useEffect.
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,15 +70,11 @@ export default function ReadCustomers() {
     fetchCustomers();
   };
 
-  // Pagination logic
-  const indexOfLastCustomer = currentPage * rowsPerPage;
-  const indexOfFirstCustomer = indexOfLastCustomer - rowsPerPage;
-  const currentCustomers = customers.slice(indexOfFirstCustomer, indexOfLastCustomer);
-  const totalPages = Math.ceil(customers.length / rowsPerPage);
+  const totalPages = Math.ceil(total / rowsPerPage);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Customers</h2>
+      <h2 className="text-2xl font-bold mb-6">Customers List</h2>
 
       {/* Search bar */}
       <form
@@ -89,9 +101,9 @@ export default function ReadCustomers() {
 
       {!loading && !error && (
         <div className="overflow-x-auto">
-          <table className="table-auto border-collapse border border-gray-300 w-full">
+          <table className="table-auto border-collapse border border-gray-300 w-full text-black">
             <thead>
-              <tr className="bg-gray-100 text-left">
+              <tr className="bg-gray-300 text-left">
                 <th className="border px-4 py-2">Name</th>
                 <th className="border px-4 py-2">Email</th>
                 <th className="border px-4 py-2">Phone</th>
@@ -100,17 +112,25 @@ export default function ReadCustomers() {
               </tr>
             </thead>
             <tbody>
-              {currentCustomers.length > 0 ? (
-                currentCustomers.map((customer) => (
-                  <tr key={customer._id}>
+              {customers.length > 0 ? (
+                customers.map((customer) => (
+                  <tr key={customer._id} className="bg-gray-100 text-left">
                     <td className="border px-4 py-2">
                       {customer.first_name} {customer.last_name}
                     </td>
-                    <td className="border px-4 py-2">{customer.email || "—"}</td>
-                    <td className="border px-4 py-2">{customer.phone_number || "—"}</td>
-                    <td className="border px-4 py-2 text-right">{customer.loyalty_point}</td>
                     <td className="border px-4 py-2">
-                      {new Date(customer.created_at).toLocaleDateString()}
+                      {customer.email || "—"}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {customer.phone_number || "—"}
+                    </td>
+                    <td className="border px-4 py-2 text-right">
+                      {customer.loyalty_point || 0}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {customer.created_at
+                        ? new Date(customer.created_at).toLocaleDateString()
+                        : "—"}
                     </td>
                   </tr>
                 ))
@@ -118,7 +138,7 @@ export default function ReadCustomers() {
                 <tr>
                   <td
                     colSpan={5}
-                    className="border px-4 py-2 text-center text-gray-500"
+                    className="border px-4 py-2 text-center text-gray-500 text-black"
                   >
                     No customers found
                   </td>
@@ -146,6 +166,23 @@ export default function ReadCustomers() {
             >
               Next
             </button>
+          </div>
+          {/* Rows per page selector */}
+          <div className="mt-4 flex items-center gap-2">
+            <label className="font-medium text-black">Rows per page:</label>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1); // reset to first page when changing rows
+              }}
+              className="border border-gray-300 rounded px-2 py-1 text-black"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
           </div>
         </div>
       )}

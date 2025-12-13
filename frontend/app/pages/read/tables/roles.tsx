@@ -150,7 +150,7 @@ export default function ReadRoles() {
                 setRowsPerPage(Number(e.target.value));
                 setCurrentPage(1); // reset to first page when changing rows
               }}
-              className="border border-gray-300 rounded px-2 py-1"
+              className="border border-gray-300 rounded px-2 py-1 text-black"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
