@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { domain_link } from "../../domain";
 
-export function CreateProductCategories() {
+export default function CreateProductCategories() {
   const [category_name, setCategoryName] = useState("");
   const [category_description, setCategoryDesc] = useState("");
   const [message, setMessage] = useState("");

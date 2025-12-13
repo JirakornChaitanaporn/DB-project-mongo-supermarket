@@ -30,6 +30,7 @@
   box-shadow: 
     0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
 
 .dropdown-menu .text {
@@ -52,3 +53,8 @@
 .dropdown-item:hover {
   background-color: #f3f4f6;
 }
+
+.my-button {
+  z-index: 5;
+}
+

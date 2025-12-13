@@ -50,7 +50,21 @@ export function HomePage() {
           <div className="page">
             <main className="page__main">
               <div className="page-header">
-                <h1 className="head-text">Choosw</h1>
+                <h1 className="head-text">Querry</h1>
+              </div>
+
+              <div key={"Query"}>
+                <div className="homepage-nav__button">
+                  <a href="query">
+                    <img src={read_icon} width="192" height="192" title={`CRUD_query`}></img>
+                  </a>
+                </div>
+              </div>
+
+              <div style={{ height: "45px" }}></div>
+
+              <div className="page-header">
+                <h1 className="head-text">Choose CRUD?</h1>
               </div>
 
               <div className="griddy-2-cols">
@@ -81,6 +95,5 @@ export function HomePage() {
     </div>
   );
 }
-
 
 

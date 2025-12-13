@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 
-export function CreatePromotion() {
+export default function CreatePromotion() {
   const [promotion_name, setPromotionName] = useState("");
   const [product_id, setProductId] = useState("");
   const [discount_type, setDiscountType] = useState("amount");
@@ -11,14 +11,18 @@ export function CreatePromotion() {
   const [products, setProducts] = useState<any[]>([]);
   const [message, setMessage] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showRoleModal, setShowRoleModal] = useState(false);
+
   // Fetch products for dropdown
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(`${domain_link}api/product/fetch`);
         const data = await response.json();
+
         if (response.ok) {
-          setProducts(data);
+          setProducts(Array.isArray(data) ? data : data.products || []);
         }
       } catch (err) {
         console.error("Error fetching products:", err);
