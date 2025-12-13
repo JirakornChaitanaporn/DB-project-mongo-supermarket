@@ -13,7 +13,7 @@ import {} from "./tables/employees";
 import {} from "./tables/product_categories";
 import { UpdateProduct } from "./tables/product";
 import {} from "./tables/promotions";
-import {} from "./tables/roles";
+import { EditRole } from "./tables/roles";
 import {} from "./tables/suppliers";
 
 export function UpdatePage() {
@@ -81,7 +81,7 @@ export function UpdatePage() {
                 {currentPage === "Product_Categories" && <p>Please choose a topic above.</p>}
                 {currentPage === "Product" && <p>Please choose a topic above.</p>}
                 {currentPage === "Promotion" && <p>Please choose a topic above.</p>}
-                {currentPage === "Role" && <p>Please choose a topic above.</p>}
+                {currentPage === "Role" && <EditRole />}
                 {currentPage === "Supplier" && <p>Please choose a topic above.</p>}
 
                 {/* None */}

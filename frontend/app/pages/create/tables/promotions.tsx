@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 
-export function CreatePromotion() {
+export default function CreatePromotion() {
   const [promotion_name, setPromotionName] = useState("");
   const [product_id, setProductId] = useState("");
   const [discount_type, setDiscountType] = useState("amount");
@@ -10,6 +10,9 @@ export function CreatePromotion() {
   const [end_date, setEndDate] = useState("");
   const [products, setProducts] = useState<any[]>([]);
   const [message, setMessage] = useState("");
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showRoleModal, setShowRoleModal] = useState(false);
 
   // Fetch products for dropdown
   useEffect(() => {

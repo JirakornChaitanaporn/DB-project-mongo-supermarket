@@ -1,52 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
+import SelectEntityModal from "../../../component/Modals/selectModal"
 
-export function CreateEmployee() {
+export default function CreateEmployee() {
   const [first_name, setFirstName] = useState("");
   const [last_name, setLastName] = useState("");
   const [phone_number, setPhoneNumber] = useState("");
   const [gender, setGender] = useState("");
   const [role_id, setRoleId] = useState("");
-  const [role_name, setRoleName] = useState(""); // store selected role name for display
+  const [role_name, setRoleName] = useState("");
   const [hire_date, setHireDate] = useState("");
-  const [roles, setRoles] = useState<any[]>([]);
   const [message, setMessage] = useState("");
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [showRoleModal, setShowRoleModal] = useState(false);
 
-  // Fetch roles from backend
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const response = await fetch(`${domain_link}api/role/fetch`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setRoles(data);
-        }
-      } catch (err) {
-        console.error("Error fetching roles:", err);
-      }
-    };
-    fetchRoles();
-  }, []);
-
-  const filteredRoles = roles.filter((role) =>
-    role.role_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 5;
-
-  const paginatedRoles = filteredRoles.slice(
-    currentPage * itemsPerPage,
-    currentPage * itemsPerPage + itemsPerPage
-  );
-
-
+  // Submit employee
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -67,17 +35,11 @@ export function CreateEmployee() {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         setMessage("Employee created successfully!");
-        // Reset form
-        setFirstName("");
-        setLastName("");
-        setPhoneNumber("");
-        setGender("");
-        setRoleId("");
-        setRoleName("");
-        setHireDate("");
+        // reset form
+        setFirstName(""); setLastName(""); setPhoneNumber("");
+        setGender(""); setRoleId(""); setRoleName(""); setHireDate("");
       } else {
         setMessage(data.error || "Error creating employee");
       }
@@ -87,17 +49,11 @@ export function CreateEmployee() {
     }
   };
 
-  // Select role from modal
-  const selectRole = (id: string, name: string) => {
-    setRoleId(id);
-    setRoleName(name);
-    setShowRoleModal(false);
-  };
-
   return (
     <div className="p-4 max-w-md mx-auto">
       <h2 className="text-xl font-bold mb-4">Create Employee</h2>
 
+      {/* Employee Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block font-medium">First Name:</label>
@@ -185,107 +141,22 @@ export function CreateEmployee() {
 
       {message && <p className="mt-4 text-center text-blue-600">{message}</p>}
 
-      {showRoleModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-[500px] h-[600px] max-w-full p-6 flex flex-col transition duration-300 ease-in-out">
-            <h3 className="text-lg font-semibold mb-4 text-gray-800 text-center">
-              Select a Role
-            </h3>
-
-            {/* Search Bar */}
-            <input
-              type="text"
-              placeholder="Search roles..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(0);
-              }}
-              className="w-full border border-gray-300 rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
-            />
-
-            {/* Table */}
-            <div className="border border-gray-300 overflow-hidden">
-              <table className="table-auto w-full">
-                <thead className="bg-gray-100 text-gray-700">
-                  <tr>
-                    <th className="border px-4 py-2 text-left">Role</th>
-                    <th className="border px-4 py-2 text-left">Salary</th>
-                    <th className="border px-4 py-2 text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="text-gray-800 align-top" style={{ height: `${5 * 48}px` }}>
-                  {paginatedRoles.map((role) => (
-                    <tr key={role._id} className="hover:bg-gray-50">
-                      <td className="border px-4 py-2">{role.role_name}</td>
-                      <td className="border px-4 py-2">{role.role_salary}</td>
-                      <td className="border px-4 py-2 text-center">
-                        <button
-                          onClick={() => selectRole(role._id, role.role_name)}
-                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                        >
-                          Select
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {/* Fill remaining rows */}
-                  {Array.from({ length: 5 - paginatedRoles.length }).map((_, idx) => (
-                    <tr key={`empty-${idx}`} className="bg-white">
-                      <td className="border px-4 py-2">&nbsp;</td>
-                      <td className="border px-4 py-2">&nbsp;</td>
-                      <td className="border px-4 py-2 text-center">&nbsp;</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Divider */}
-            <hr className="my-4 border-gray-200" />
-
-            {/* Pagination Controls */}
-            <div className="flex justify-between items-center">
-              <button
-                disabled={currentPage === 0}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-                className={`px-3 py-1 rounded transition ${
-                  currentPage === 0
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-gray-300 hover:bg-gray-400"
-                }`}
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-600">
-                Page {currentPage + 1} of {Math.ceil(filteredRoles.length / itemsPerPage)}
-              </span>
-              <button
-                disabled={(currentPage + 1) * itemsPerPage >= filteredRoles.length}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-                className={`px-3 py-1 rounded transition ${
-                  (currentPage + 1) * itemsPerPage >= filteredRoles.length
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-gray-300 hover:bg-gray-400"
-                }`}
-              >
-                Next
-              </button>
-            </div>
-
-            {/* Cancel Button */}
-            <div className="mt-4 flex justify-center">
-              <button
-                onClick={() => setShowRoleModal(false)}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Role Selection Modal */}
+      <SelectEntityModal
+        show={showRoleModal}
+        title="Select Role"
+        fetchUrl="api/role/fetch"
+        columns={[
+          { key: "role_name", label: "Role" },
+          { key: "role_salary", label: "Salary" },
+        ]}
+        onSelect={(role) => {
+          setRoleId(role._id);
+          setRoleName(role.role_name);
+          setShowRoleModal(false);
+        }}
+        onCancel={() => setShowRoleModal(false)}
+      />
     </div>
   );
 }

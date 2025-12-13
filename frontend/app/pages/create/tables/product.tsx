@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 
-export function CreateProduct() {
+export default function CreateProduct() {
   const [product_name, setProductName] = useState("");
   const [price, setPrice] = useState(0);
   const [supplier_id, setSupplierId] = useState("");

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 
-export function ReadBill() {
+export default function ReadBill() {
   const [bills, setBills] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -10,11 +10,12 @@ export function ReadBill() {
   const rowsPerPage = 10;
 
   // Fetch bills from backend
-  const fetchBills = async () => {
-    setLoading(true);
-    setError("");
+  // Fetch bills from backend
+const fetchBills = async () => {
+  setLoading(true);
+  setError("");
 
-    const queryParams = new URLSearchParams();
+  const queryParams = new URLSearchParams();
     if (searchTerm) {
       queryParams.append("search", searchTerm);
     }
@@ -29,12 +30,22 @@ export function ReadBill() {
       );
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || "Failed to fetch bills");
+        // Try JSON first, fallback to text if not valid JSON
+        let message = "Failed to fetch bills";
+        try {
+          const errData = await response.json();
+          message = errData.message || message;
+        } catch {
+          const errText = await response.text();
+          message = errText || message;
+        }
+        throw new Error(message);
       }
 
+      // Parse success response
       const data = await response.json();
-      setBills(data);
+      // Handle both array and object response shapes
+      setBills(Array.isArray(data) ? data : data.bills || []);
     } catch (err: any) {
       console.error("Error fetching bills:", err);
       setError(err.message);

@@ -6,15 +6,15 @@ import DropdownButton from "../../component/dropdown/choose_button";
 import { useState } from "react";
 
 // import pages
-import {} from "./tables/bill_items";
-import {} from "./tables/bill";
-import {} from "./tables/customers";
-import {} from "./tables/employees";
-import {} from "./tables/product_categories";
+import { DeleteBillItem } from "./tables/bill_items";
+import { DeleteBill } from "./tables/bill";
+import { DeleteCustomer } from "./tables/customers";
+import { DeleteEmployee } from "./tables/employees";
+import { DeleteCategory } from "./tables/product_categories";
 import { DeleteProduct } from "./tables/product";
-import {} from "./tables/promotions";
-import {} from "./tables/roles";
-import {} from "./tables/suppliers";
+import { DeletePromotion } from "./tables/promotions";
+import { DeleteRole } from "./tables/roles";
+import { DeleteSupplier } from "./tables/suppliers";
 
 export function DelmovePage() {
 
@@ -74,15 +74,15 @@ export function DelmovePage() {
 
               <div className="bottom-gap">
                 {/* Condition on currentPage */}
-                {currentPage === "Bill_Item" && <p>Please choose a topic above.</p>}
-                {currentPage === "Bill" && <p>Please choose a topic above.</p>}
-                {currentPage === "Customer" && <p>Please choose a topic above.</p>}
-                {currentPage === "Employee" && <p>Please choose a topic above.</p>}
-                {currentPage === "Product_Categories" && <p>Please choose a topic above.</p>}
+                {currentPage === "Bill_Item" && <DeleteBillItem />}
+                {currentPage === "Bill" && <DeleteBill />}
+                {currentPage === "Customer" && <DeleteCustomer />}
+                {currentPage === "Employee" && <DeleteEmployee />}
+                {currentPage === "Product_Categories" && <DeleteCategory />}
                 {currentPage === "Product" && <DeleteProduct />}
-                {currentPage === "Promotion" && <p>Please choose a topic above.</p>}
-                {currentPage === "Role" && <p>Please choose a topic above.</p>}
-                {currentPage === "Supplier" && <p>Please choose a topic above.</p>}
+                {currentPage === "Promotion" && <DeletePromotion />}
+                {currentPage === "Role" && <DeleteRole />}
+                {currentPage === "Supplier" && <DeleteSupplier />}
 
                 {/* None */}
                 {currentPage === "" && <p>Please choose a topic above.</p>}

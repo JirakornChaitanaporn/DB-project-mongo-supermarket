@@ -27,7 +27,7 @@ interface Promotion {
   end_date: string;
 }
 
-export function CreateBillItem() {
+export default function CreateBillItem() {
   const [bill_id, setBillId] = useState<string>("");
   const [product_id, setProductId] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);

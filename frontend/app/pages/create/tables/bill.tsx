@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 
-export function CreateBill() {
+export default function CreateBill() {
   const [customer_id, setCustomerId] = useState<string | null>(null);
   const [employee_id, setEmployeeId] = useState("");
   const [customers, setCustomers] = useState<any[]>([]);

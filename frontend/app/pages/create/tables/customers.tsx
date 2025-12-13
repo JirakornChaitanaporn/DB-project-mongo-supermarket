@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { domain_link } from "../../domain";
 
-export function CreateCustomer() {
+export default function CreateCustomer() {
   const [first_name, setFirstName] = useState("");
   const [last_name, setLastName] = useState("");
   const [email, setEmail] = useState("");
