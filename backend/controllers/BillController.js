@@ -25,58 +25,32 @@ const fetch = async (req, res) => {
     const conn = createConnection();
     const Bill = conn.model("Bill", BillSchema);
 
-    // Register referenced schemas
-    const CustomerSchema = new mongoose.Schema({
-      first_name: { type: String, required: true },
-      last_name: { type: String, required: true },
-      email: { type: String, unique: true, match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"] },
-      phone_number: { type: String, match: [/^\+?[0-9]{7,15}$/, "Please enter a valid phone number"] },
-      loyalty_point: { type: Number, default: 0 },
-      created_at: { type: Date, default: Date.now }
-    }, { collection: "customers" });
-    conn.model("Customer", CustomerSchema);
+    const { search, page = 1, limit = 10 } = req.query;
 
-    const BillItemSchema = new mongoose.Schema({
-      bill_id: { type: mongoose.Schema.Types.ObjectId, ref: "Bill", required: true },
-      product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
-      quantity: { type: Number, required: true, min: 1 },
-      price: { type: Number, required: true, min: 0 },
-      promotion: { type: mongoose.Schema.Types.ObjectId, ref: "Promotion", default: null },
-      final_price: { type: Number, required: true, min: 0 }
-    }, { collection: "bill_items", timestamps: true });
-    conn.model("BillItem", BillItemSchema);
-
-    const ProductSchema = new mongoose.Schema({
-      product_name: { type: String, required: true },
-      price: { type: Number, required: true },
-      supplier_id: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier", required: true },
-      category_id: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
-      quantity: { type: Number, required: true },
-      created_at: { type: Date, default: Date.now }
-    }, { collection: "products" });
-    conn.model("Product", ProductSchema);
-
-    const { search } = req.query;
-
+    // Build query
     let query = {};
     if (search) {
-      // Search by first_name OR last_name
+      // Example: search by customer_id or employee_id string
+      // (You might want to adjust this to search by populated fields)
       query.$or = [
-        { first_name: { $regex: search, $options: "i" } },
-        { last_name: { $regex: search, $options: "i" } }
+        { customer_id: { $regex: search, $options: "i" } },
+        { employee_id: { $regex: search, $options: "i" } },
       ];
     }
 
+    // Apply pagination
     const bills = await Bill.find(query)
-      .populate("customer_id", "first_name last_name")
-      .populate("products")
-      .populate({
-        path: "products",
-        populate: { path: "product_id", select: "product_name price" }
-      });
+      .populate("customer_id")   // include customer details
+      .populate("employee_id")   // include employee details
+      .populate("products")      // include bill items
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
 
-    await conn.close();
-    res.status(200).json(bills);
+    // Count total matching documents
+    const total = await Bill.countDocuments(query);
+
+    conn.close();
+    res.status(200).json({ bills, total });
   } catch (error) {
     console.error("Fetch bills error:", error);
     res.status(500).json({ error: "Server error while fetching bills" });

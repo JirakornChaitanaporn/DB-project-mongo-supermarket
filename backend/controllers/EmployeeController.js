@@ -24,23 +24,30 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Employee = conn.model("Employee", EmployeeSchema);
-    const Role = conn.model("Role", RoleSchema);
 
-    const { search } = req.query;
+    const { search, page = 1, limit = 10 } = req.query;
 
+    // Build query
     let query = {};
     if (search) {
+      // Search by first_name or last_name
       query.$or = [
         { first_name: { $regex: search, $options: "i" } },
-        { last_name: { $regex: search, $options: "i" } }
+        { last_name: { $regex: search, $options: "i" } },
       ];
     }
 
+    // Apply pagination
     const employees = await Employee.find(query)
-      .populate("role_id", "role_name role_salary");
+      .populate("role_id") // include role details
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
 
-    await conn.close();
-    res.status(200).json(employees);
+    // Count total matching documents
+    const total = await Employee.countDocuments(query);
+
+    conn.close();
+    res.status(200).json({ employees, total });
   } catch (error) {
     console.error("Fetch employees error:", error);
     res.status(500).json({ error: "Server error while fetching employees" });

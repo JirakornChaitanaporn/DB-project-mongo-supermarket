@@ -1,5 +1,4 @@
 const { createConnection } = require("../utils/mongo");
-const mongoose = require("mongoose");
 const { RoleSchema } = require("../schemas/RoleModel");
 
 // Create
@@ -28,23 +27,32 @@ const create = async (req, res) => {
 
 // Read (fetch all or search by role_name)
 const fetch = async (req, res) => {
-    try {
-        const conn = createConnection();
-        const Role = conn.model("Role", RoleSchema);
-        const { search } = req.query;
+  try {
+    const conn = createConnection();
+    const Role = conn.model("Role", RoleSchema);
+    
+    const { search, page = 1, limit = 10 } = req.query;
 
-        let query = {};
-        if (search) {
-            query.role_name = { $regex: search, $options: "i" };
-        }
-
-        const roles = await Role.find(query);
-        conn.close();
-        res.status(200).json(roles);
-    } catch (error) {
-        console.error("Fetch roles error:", error);
-        res.status(500).json({ error: "Server error while fetching roles" });
+    // Build query first
+    let query = {};
+    if (search) {
+      query.role_name = { $regex: search, $options: "i" };
     }
+
+    // Apply pagination
+    const roles = await Role.find(query)
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
+
+    // Count total matching documents
+    const total = await Role.countDocuments(query);
+
+    conn.close();
+    res.status(200).json({ roles, total });
+  } catch (error) {
+    console.error("Fetch roles error:", error);
+    res.status(500).json({ error: "Server error while fetching roles" });
+  }
 };
 
 const fetchById = async (req, res) => {

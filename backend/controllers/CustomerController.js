@@ -26,31 +26,31 @@ const create = async (req, res) => {
 
 // Read (fetch all or search by name)
 const fetch = async (req, res) => {
-    try {
-        const conn = createConnection();
-        const Customer = conn.model("Customer", CustomerSchema);
+  try {
+    const conn = createConnection();
+    const Customer = conn.model("Customer", CustomerSchema);
 
-        const { search } = req.query;
+    const { search, page = 1, limit = 10 } = req.query;
 
-        let query = {};
-        if (search) {
-            // Search by first_name OR last_name
-            query.$or = [
-                { first_name: { $regex: search, $options: "i" } },
-                { last_name: { $regex: search, $options: "i" } },
-            ];
-        }
-
-        const customers = await Customer.find({});
-        conn.close();
-
-        res.status(200).json(customers);
-    } catch (error) {
-        console.error("Fetch customers error:", error);
-        res.status(500).json({
-            error: "Server error while fetching customers",
-        });
+    let query = {};
+    if (search) {
+      query.first_name = { $regex: search, $options: "i" } ;
     }
+
+    // Apply pagination
+    const customers = await Customer.find(query)
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
+
+    // Count total matching documents
+    const total = await Customer.countDocuments(query);
+
+    conn.close();
+    res.status(200).json({ customers, total });
+  } catch (error) {
+    console.error("Fetch customers error:", error);
+    res.status(500).json({ error: "Server error while fetching customers" });
+  }
 };
 
 const fetchById = async (req,res) => {

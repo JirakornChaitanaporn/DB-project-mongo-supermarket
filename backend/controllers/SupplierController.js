@@ -23,17 +23,25 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Supplier = conn.model("Supplier", SupplierSchema);
+    
+    const { search, page = 1, limit = 10 } = req.query;
 
-    const { search } = req.query;
-
+    // Build query first
     let query = {};
     if (search) {
       query.supplier_name = { $regex: search, $options: "i" };
     }
 
-    const suppliers = await Supplier.find(query);
-    await conn.close();
-    res.status(200).json(suppliers);
+    // Apply pagination
+    const suppliers = await Supplier.find(query)
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
+
+    // Count total matching documents
+    const total = await Supplier.countDocuments(query);
+
+    conn.close();
+    res.status(200).json({ suppliers, total });
   } catch (error) {
     console.error("Fetch suppliers error:", error);
     res.status(500).json({ error: "Server error while fetching suppliers" });

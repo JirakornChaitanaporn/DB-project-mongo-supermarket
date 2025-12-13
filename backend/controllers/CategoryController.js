@@ -1,5 +1,4 @@
 const { createConnection } = require("../utils/mongo");
-const mongoose = require("mongoose");
 const { CategorySchema } = require("../schemas/CategoryModel")
 // Create
 const create = async (req, res) => {
@@ -18,26 +17,34 @@ const create = async (req, res) => {
     }
 };
 
-// Read
+// Read (fetch all or search by category_name)
 const fetch = async (req, res) => {
-    try {
-        const conn = createConnection();
-        const Category = conn.model("Category", CategorySchema);
+  try {
+    const conn = createConnection();
+    const Category = conn.model("Category", CategorySchema);
+    
+    const { search, page = 1, limit = 10 } = req.query;
 
-        const { search } = req.query;
-
-        let query = {};
-        if (search) {
-            query.category_name = { $regex: search, $options: "i" };
-        }
-
-        const categories = await Category.find(query);
-        await conn.close();
-        res.status(200).json(categories);
-    } catch (error) {
-        console.error("Fetch categories error:", error);
-        res.status(500).json({ error: "Server error while fetching categories" });
+    // Build query first
+    let query = {};
+    if (search) {
+      query.category_name = { $regex: search, $options: "i" };
     }
+
+    // Apply pagination
+    const category = await Category.find(query)
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
+
+    // Count total matching documents
+    const total = await Category.countDocuments(query);
+
+    conn.close();
+    res.status(200).json({ category, total });
+  } catch (error) {
+    console.error("Fetch category error:", error);
+    res.status(500).json({ error: "Server error while fetching category" });
+  }
 };
 
 // Update Category

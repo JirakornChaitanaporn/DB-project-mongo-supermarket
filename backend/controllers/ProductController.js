@@ -19,48 +19,32 @@ const create = async (req, res) => {
   }
 };
 
-// Read (fetch all or search by product_name)
+// Read (fetch all or search by role_name)
 const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Product = conn.model("Product", ProductSchema);
 
-    // Register referenced schemas
-    const CategorySchema = new mongoose.Schema({
-      category_name: { type: String, required: true, unique: true },
-      category_description: { type: String }
-    }, { collection: "categories" });
-    conn.model("Category", CategorySchema);
+    const { search, page = 1, limit = 10 } = req.query;
 
-    const SupplierSchema = new mongoose.Schema({
-      supplier_name: { type: String, required: true },
-      contacts: {
-        person: { type: String, required: true },
-        email: { type: String },
-        phone: { type: String, required: true }
-      },
-      address: {
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        postal_code: { type: String, required: true },
-        country: { type: String, required: true }
-      }
-    }, { collection: "suppliers" });
-    conn.model("Supplier", SupplierSchema);
-
-    const { search } = req.query;
-
+    // Build query
     let query = {};
     if (search) {
       query.product_name = { $regex: search, $options: "i" };
     }
 
+    // Apply pagination
     const products = await Product.find(query)
-      .populate("category_id", "category_name category_description")
-      .populate("supplier_id", "supplier_name contacts");
+      .populate("supplier_id") // optional: include supplier details
+      .populate("category_id") // optional: include category details
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
 
-    await conn.close();
-    res.status(200).json(products);
+    // Count total matching documents
+    const total = await Product.countDocuments(query);
+
+    conn.close();
+    res.status(200).json({ products, total });
   } catch (error) {
     console.error("Fetch products error:", error);
     res.status(500).json({ error: "Server error while fetching products" });
