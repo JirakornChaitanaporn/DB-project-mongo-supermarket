@@ -13,14 +13,15 @@ import { Link } from "react-router";
 export function HomePage() {
 
   const crudItems = [
-  { label: "Create", icon: create_icon },
-  { label: "Read", icon: read_icon },
-  { label: "Update", icon: update_icon },
-  { label: "Delete", icon: delete_icon },
+    { label: "Create", icon: create_icon },
+    { label: "Read", icon: read_icon },
+    { label: "Update", icon: update_icon },
+    { label: "Delete", icon: delete_icon },
+    { label: "Query", icon: read_icon },
   ];
 
 
-    return (
+  return (
     <div className="page-container">
       {/* Navigation Bar */}
       <nav className="global-top-navigation">
@@ -53,20 +54,20 @@ export function HomePage() {
               </div>
 
               <div className="griddy-2-cols">
-              {crudItems.map(({ label, icon }) => (
-                <div key={label}>
-                  <div className="homepage-nav__button">
-                    <a href={label.toLowerCase()}>
-                      <img src={icon} width="192" height="192" title={`CRUD_${label.toLowerCase()}`}></img>
-                    </a>
+                {crudItems.map(({ label, icon }) => (
+                  <div key={label}>
+                    <div className="homepage-nav__button">
+                      <a href={label.toLowerCase()}>
+                        <img src={icon} width="192" height="192" title={`CRUD_${label.toLowerCase()}`}></img>
+                      </a>
+                    </div>
+                    <Link to={label.toLowerCase()} className="homepage-nav__underbutton">
+                      {label}
+                    </Link>
                   </div>
-                  <Link to={label.toLowerCase()} className="homepage-nav__underbutton">
-                    {label}
-                  </Link>
-                </div>
-              ))}
+                ))}
               </div>
-            
+
             </main>
           </div>
         </div>
