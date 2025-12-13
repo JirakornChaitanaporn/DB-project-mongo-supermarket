@@ -3,7 +3,7 @@ import { domain_link } from "../../domain";
 
 import ConfirmModal from "../../../component/Modals/deleteModal";
 
-export function DeleteRole() {
+export default function DeleteRole() {
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

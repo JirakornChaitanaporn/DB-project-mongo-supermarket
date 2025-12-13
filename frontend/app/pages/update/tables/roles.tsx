@@ -3,7 +3,7 @@ import { domain_link } from "../../domain";
 
 import BlankPage from "../../../component/Modals/updateModal";
 
-export function EditRole() {
+export default function EditRole() {
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
