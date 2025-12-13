@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
 import BlankPage from "../../../component/Modals/updateModal";
 
-export function EditSupplier() {
+export  default function EditSupplier() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

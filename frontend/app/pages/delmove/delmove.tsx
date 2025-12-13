@@ -1,54 +1,63 @@
+import React, { Suspense, useState } from "react";
 import "./delmove.css";
 import bg0img from "../../assets/delmove/background.png";
 import l0go from "../../assets/logo.png";
 
 import DropdownButton from "../../component/dropdown/choose_button";
-import { useState } from "react";
 
-// import pages
-import { DeleteBillItem } from "./tables/bill_items";
-import { DeleteBill } from "./tables/bill";
-import { DeleteCustomer } from "./tables/customers";
-import { DeleteEmployee } from "./tables/employees";
-import { DeleteCategory } from "./tables/product_categories";
-import { DeleteProduct } from "./tables/product";
-import { DeletePromotion } from "./tables/promotions";
-import { DeleteRole } from "./tables/roles";
-import { DeleteSupplier } from "./tables/suppliers";
+// Lazy imports (same pattern as ReadPage)
+const DeleteBillItem = React.lazy(() => import("./tables/bill_items"));
+const DeleteBill = React.lazy(() => import("./tables/bill"));
+const DeleteCustomer = React.lazy(() => import("./tables/customers"));
+const DeleteEmployee = React.lazy(() => import("./tables/employees"));
+const DeleteCategory = React.lazy(() => import("./tables/product_categories"));
+const DeleteProduct = React.lazy(() => import("./tables/product"));
+const DeletePromotion = React.lazy(() => import("./tables/promotions"));
+const DeleteRole = React.lazy(() => import("./tables/roles"));
+const DeleteSupplier = React.lazy(() => import("./tables/suppliers"));
 
 export function DelmovePage() {
+  const pageComponents: Record<string, React.ComponentType<any>> = {
+    Bill_Item: DeleteBillItem,
+    Bill: DeleteBill,
+    Customer: DeleteCustomer,
+    Employee: DeleteEmployee,
+    Product_Categories: DeleteCategory,
+    Product: DeleteProduct,
+    Promotion: DeletePromotion,
+    Role: DeleteRole,
+    Supplier: DeleteSupplier,
+  };
 
   const [currentPage, setCurrentPage] = useState("");
-
-  const handlePageChange = (topic: string) => {
-    setCurrentPage(topic); // updates state and triggers re-render
-  };
 
   return (
     <div className="page-container">
       {/* Navigation Bar */}
       <nav className="global-top-navigation">
         <div className="margaintoleft-x4">
-          <a href="/" className="text-nav">Home</a>
+          <a href="/" className="text-nav">
+            Home
+          </a>
         </div>
       </nav>
 
-      {/* The Whole Page */}
       <div className="main-container">
-        <div className="main-background" style={{ backgroundImage: `url(${bg0img})` }}></div>
+        <div
+          className="main-background"
+          style={{ backgroundImage: `url(${bg0img})` }}
+        ></div>
 
-        {/* All Content in Here */}
         <div className="global-container">
           <div className="header-wrapper">
             <header className="header-x2">
               <a style={{ marginRight: "18px" }}>
-                <img src={l0go} width="128" height="128" data-test="fandom-community-header-community-logo"></img>
+                <img src={l0go} width="128" height="128" alt="logo" />
               </a>
-              <div className="header-text">
-                DB-project-mongo-supermarket
-              </div>
+              <div className="header-text">DB-project-mongo-supermarket</div>
             </header>
           </div>
+
           <div className="page">
             <main className="page__main">
               <div className="page-header">
@@ -58,45 +67,29 @@ export function DelmovePage() {
               <div className="bottom-gap">
                 <DropdownButton
                   defaultLabel="Choose Topic"
-                  options={["Bill_Item",
-                            "Bill",
-                            "Customer",
-                            "Employee",                     
-                            "Product_Categories",
-                            "Product",
-                            "Promotion",
-                            "Role",
-                            "Supplier"
-                          ]}
-                  onSelect={(topic) => handlePageChange(topic)} 
+                  options={Object.keys(pageComponents)}
+                  onSelect={(topic) => setCurrentPage(topic)}
                 />
               </div>
 
               <div className="bottom-gap">
-                {/* Condition on currentPage */}
-                {currentPage === "Bill_Item" && <DeleteBillItem />}
-                {currentPage === "Bill" && <DeleteBill />}
-                {currentPage === "Customer" && <DeleteCustomer />}
-                {currentPage === "Employee" && <DeleteEmployee />}
-                {currentPage === "Product_Categories" && <DeleteCategory />}
-                {currentPage === "Product" && <DeleteProduct />}
-                {currentPage === "Promotion" && <DeletePromotion />}
-                {currentPage === "Role" && <DeleteRole />}
-                {currentPage === "Supplier" && <DeleteSupplier />}
-
-                {/* None */}
-                {currentPage === "" && <p>Please choose a topic above.</p>}
+                <Suspense fallback={<p>Loading delete table...</p>}>
+                  {(() => {
+                    const Page = pageComponents[currentPage];
+                    return Page ? (
+                      <Page />
+                    ) : (
+                      <p>Please choose a topic above.</p>
+                    );
+                  })()}
+                </Suspense>
               </div>
             </main>
           </div>
         </div>
 
-        {/* End Part */}
-        <div className="global-footer">
-
-        </div>
+        <div className="global-footer"></div>
       </div>
-
     </div>
   );
 }
