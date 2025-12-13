@@ -1,7 +1,8 @@
 const { createConnection } = require("../utils/mongo");
-const mongoose = require("mongoose");
 const { BillItemSchema } = require("../schemas/BillItemModel")
 const { BillSchema } = require("../schemas/BillModel")
+const { ProductSchema } = require("../schemas/ProductModel")
+const { PromotionSchema } = require("../schemas/PromotionModel")
 
 
 // Create
@@ -48,6 +49,9 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const BillItem = conn.model("BillItem", BillItemSchema);
+    const Bill = conn.model("Bill", BillSchema);
+    const Product = conn.model("Product", ProductSchema);
+    const Promotion = conn.model("Promotion", PromotionSchema);
 
     const { search, page = 1, limit = 10 } = req.query;
 

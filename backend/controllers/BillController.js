@@ -1,5 +1,10 @@
 const { createConnection } = require("../utils/mongo");
-const {BillSchema} = require("../schemas/BillModel")
+const { BillSchema } = require("../schemas/BillModel")
+const { BillItemSchema } = require("../schemas/BillItemModel")
+const { ProductSchema } = require("../schemas/ProductModel")
+const { PromotionSchema } = require("../schemas/PromotionModel")
+const { CustomerSchema } = require("../schemas/CustomerModel")
+const { EmployeeSchema } = require("../schemas/EmployeeModel")
 
 // Create
 const create = async (req, res) => {
@@ -23,6 +28,11 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Bill = conn.model("Bill", BillSchema);
+    const BillItem = conn.model("BillItem", BillItemSchema);
+    const Product = conn.model("Product", ProductSchema);
+    const Promotion = conn.model("Promotion", PromotionSchema);
+    const Customer = conn.model("Customer", CustomerSchema);
+    const Employee = conn.model("Employee", EmployeeSchema);
 
     const { search, page = 1, limit = 10 } = req.query;
 
