@@ -1,5 +1,4 @@
 const { createConnection } = require("../utils/mongo");
-const mongoose = require("mongoose");
 const {BillSchema} = require("../schemas/BillModel")
 
 // Create
