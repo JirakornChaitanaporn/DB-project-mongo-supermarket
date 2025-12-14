@@ -126,4 +126,22 @@ const fetchById = async (req, res) => {
   }
 };
 
-module.exports = { create, fetch, fetchById, update, deleteEmployee };
+//query 9
+const fetchRankEmployee = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Employee = conn.model("Employee", EmployeeSchema);
+    const start_date = req.params.start_date;
+    const end_date = req.params.end_date;
+
+    const employee = await Employee.aggregate([ { $match: { "transaction_time": { $gte: new Date(start_date), $lte: new Date(end_date) } } }, { $group: { _id: "$employee_id", sales: { $sum: "$total_amount" } } }, { $sort: { sales: -1 } } ]);
+
+    await conn.close();
+    res.status(200).json(employee);
+  } catch (error) {
+    console.error("Fetch employee error:", error);
+    res.status(500).json({ error: "Server error while fetching employee" });
+  }
+};
+
+module.exports = { create, fetch, fetchById, update, deleteEmployee , fetchRankEmployee };

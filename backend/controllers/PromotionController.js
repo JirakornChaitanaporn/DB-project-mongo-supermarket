@@ -51,6 +51,26 @@ const fetch = async (req, res) => {
   }
 };
 
+//query 6
+const fetchPromotionToday = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Promotion = conn.model("Promotion", PromotionSchema);
+
+    const today = req.params.date;
+
+    const promotions = await Promotion.find({ "start_date": { $lte: new Date(today) }, "end_date": { $gte: new Date(today) } })
+
+
+    await conn.close();
+    return res.status(200).json(promotions);
+  } catch (error) {
+    console.error("Fetch promotions error:", error);
+    return res.status(500).json({ error: "Server error while fetching promotions" });
+  }
+};
+
+
 // Update Promotion
 const update = async (req, res) => {
   const conn = createConnection();
@@ -122,4 +142,4 @@ const fetchById = async (req, res) => {
   }
 };
 
-module.exports = { create, fetch, fetchById, update, deletePromotion };
+module.exports = { create, fetch, fetchById, update, deletePromotion , fetchPromotionToday};
