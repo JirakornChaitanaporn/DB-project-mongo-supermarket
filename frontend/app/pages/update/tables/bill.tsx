@@ -173,7 +173,7 @@ export default function EditBill() {
                     <td className="border px-4 py-2">
                       {bill.transaction_time
                         ? new Date(bill.transaction_time).toLocaleString()
-                        : "—"}
+                        : "—"} (GMT)
                     </td>
                     <td className="border px-4 py-2 text-center">
                       <button

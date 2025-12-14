@@ -120,24 +120,14 @@ export default function CreateBillItem() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Error creating bill item");
 
-      // Update Bill with new BillItem ID
-      const updateResponse = await fetch(`${domain_link}api/bill/update/${bill_id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          $push: { products: data._id },
-          $inc: { total_amount: final_price }
-        }),
-      });
-
-      if (updateResponse.ok) {
+      if (response.ok) {
         setMessage("Bill updated with new product successfully!");
         setBillId("");
         setProductId("");
         setQuantity(1);
         setPromotionId("");
       } else {
-        const errData = await updateResponse.json();
+        const errData = await response.json();
         setMessage(errData.error || "Error updating bill");
       }
     } catch (err) {

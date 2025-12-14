@@ -138,7 +138,7 @@ export default function ReadBill() {
                         ? bill.products.map((p: any, idx: number) => (
                             <div key={p._id || idx}>
                               {p.product_id?.product_name || "Unknown"} (x
-                              {p.quantity || 1})
+                              {p.quantity || 1}) ( {p.product_id?.price} Per unit )
                             </div>
                           ))
                         : "—"}

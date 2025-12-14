@@ -59,6 +59,8 @@ const update = async (req, res) => {
   const conn = createConnection();
   try {
     const Product = conn.model("Product", ProductSchema);
+    const Supplier = conn.model("Supplier", SupplierSchema);
+    const Category = conn.model("Category", CategorySchema);
     const { id } = req.params;
 
     // Check existence
@@ -74,7 +76,10 @@ const update = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    return res.status(200).json(updatedProduct);
+    // get 
+    const updated_product = await Product.findById(id).populate('supplier_id').populate('category_id')
+
+    return res.status(200).json(updated_product);
   } catch (error) {
     console.error("Update product error:", error);
     return res.status(500).json({ error: "Something went wrong while updating product" });
