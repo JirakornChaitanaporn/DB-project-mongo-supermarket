@@ -175,14 +175,16 @@ const fetchById = async (req, res) => {
 };
 
 
-//query8
+//query 8
 const fetchBestSellingItem = async (req, res) => {
     try {
         const conn = createConnection();
         const BillItem = conn.model("BillItem", BillItemSchema);
         const limit = req.params.limit;
 
-        const billItem = await BillItem.aggregate([ { $group: { _id: "$product_id", sold: { $sum: "$quantity" } } }, { $sort: { sold: -1 } }, { $limit: Number(limit) } ]);
+        const billItem = await BillItem.aggregate([ 
+            { $group: { _id: "$product_id", sold: { $sum: "$quantity" } } }, 
+            { $sort: { sold: -1 } }, { $limit: Number(limit) } ]);
 
         await conn.close();
         res.status(200).json(billItem);

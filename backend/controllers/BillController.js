@@ -142,7 +142,7 @@ const fetchById = async (req, res) => {
   }
 };
 
-//query7
+//query 7
 const fetchByDateRange = async (req, res) => {
   try {
     const conn = createConnection();
@@ -150,7 +150,9 @@ const fetchByDateRange = async (req, res) => {
     const start_date = req.params.start_date;
     const end_date = req.params.end_date;
 
-    const bill = await Bill.aggregate([ { $match: { "transaction_time": { $gte: new Date(start_date), $lt: new Date(end_date) } } }, { $group: { _id: null, total: { $sum: "$total_amount" } } } ]);
+    const bill = await Bill.aggregate([ 
+      { $match: { "transaction_time": { $gte: new Date(start_date), $lt: new Date(end_date) } } }, 
+      { $group: { _id: null, total: { $sum: "$total_amount" } } } ]);
 
     await conn.close();
     res.status(200).json(bill);
