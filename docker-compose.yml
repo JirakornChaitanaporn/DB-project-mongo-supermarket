@@ -30,6 +30,7 @@ services:
     container_name: supermarket_frontend
     restart: always
     environment:
+      # this act like a nodemon
       WATCHPACK_POLLING: true
       CHOKIDAR_USEPOLLING: true
     ports:
