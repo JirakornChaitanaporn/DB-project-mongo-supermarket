@@ -10,8 +10,8 @@ const create = async (req, res) => {
         const conn = createConnection();
         const BillItem = conn.model("BillItem", BillItemSchema);
 
-		const true_price = req.body.price * req.body.quantity
-		req.body.final_price = true_price
+        const true_price = req.body.price * req.body.quantity
+        req.body.final_price = true_price
 
         const billItemData = new BillItem(req.body); // create document from body
 
@@ -33,8 +33,8 @@ const create = async (req, res) => {
         const updatedBill = await Bill.findByIdAndUpdate(
             req.body.bill_id,
             {
-				$inc: {total_amount: savedBillItem.final_price},
-				$push: {products: savedBillItem._id}
+                $inc: { total_amount: savedBillItem.final_price },
+                $push: { products: savedBillItem._id }
             },
             { new: true, runValidators: true }
         );
@@ -95,6 +95,7 @@ const fetch = async (req, res) => {
 const update = async (req, res) => {
     const conn = createConnection();
     try {
+        const Product = conn.model("Product", ProductSchema);
         const BillItem = conn.model("BillItem", BillItemSchema);
         const { id } = req.params;
 
@@ -104,11 +105,17 @@ const update = async (req, res) => {
             return res.status(404).json({ message: "Bill Item Not Found" });
         }
 
+        // Calculate new final_price if quantity and price are provided
+        if (req.body.quantity && req.body.price) {
+            req.body.final_price = req.body.quantity * req.body.price;
+        }
+
         // Update with validation
-        const updatedBillItem = await BillItem.findByIdAndUpdate(id, req.body, {
-            new: true,
-            runValidators: true,
-        });
+        const updatedBillItem = await BillItem.findByIdAndUpdate(
+            id,
+            req.body,
+            { new: true, runValidators: true }
+        ).populate('product_id');
 
         return res.status(200).json(updatedBillItem);
     } catch (error) {

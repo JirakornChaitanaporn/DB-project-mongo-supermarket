@@ -58,6 +58,7 @@ const fetch = async (req, res) => {
 const update = async (req, res) => {
   const conn = createConnection();
   try {
+    //hello
     const Product = conn.model("Product", ProductSchema);
     const Supplier = conn.model("Supplier", SupplierSchema);
     const Category = conn.model("Category", CategorySchema);
