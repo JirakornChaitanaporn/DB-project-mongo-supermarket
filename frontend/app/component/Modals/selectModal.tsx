@@ -38,7 +38,7 @@ export default function SelectEntityModal({
         const data = await response.json();
         if (response.ok) {
           setEntities(
-            data.bills || data.products || data.roles || data.customers || data.employees || data.categories  || data.suppliers ||[]
+            data.bills || data.products || data.roles || data.customers || data.employees || data.category  || data.suppliers ||[]
           );
           setTotal(data.total || 0);
         }
