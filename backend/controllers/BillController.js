@@ -142,4 +142,22 @@ const fetchById = async (req, res) => {
   }
 };
 
-module.exports = { fetch, fetchById, create, update, deleteBill };
+//query7
+const fetchByDateRange = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Bill = conn.model("Bill", BillSchema);
+    const start_date = req.params.start_date;
+    const end_date = req.params.end_date;
+
+    const bill = await Bill.aggregate([ { $match: { "transaction_time": { $gte: new Date(start_date), $lt: new Date(end_date) } } }, { $group: { _id: null, total: { $sum: "$total_amount" } } } ]);
+
+    await conn.close();
+    res.status(200).json(bill);
+  } catch (error) {
+    console.error("Fetch bill error:", error);
+    res.status(500).json({ error: "Server error while fetching bill" });
+  }
+};
+
+module.exports = { fetch, fetchById, create, update, deleteBill , fetchByDateRange };

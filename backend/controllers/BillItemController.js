@@ -174,4 +174,24 @@ const fetchById = async (req, res) => {
     }
 };
 
-module.exports = { fetch, fetchById, create, update, deleteBillItem };
+
+//query8
+const fetchBestSellingItem = async (req, res) => {
+    try {
+        const conn = createConnection();
+        const BillItem = conn.model("BillItem", BillItemSchema);
+        const limit = req.params.limit;
+
+        const billItem = await BillItem.aggregate([ { $group: { _id: "$product_id", sold: { $sum: "$quantity" } } }, { $sort: { sold: -1 } }, { $limit: Number(limit) } ]);
+
+        await conn.close();
+        res.status(200).json(billItem);
+    } catch (error) {
+        console.error("Fetch bill item error:", error);
+        res.status(500).json({
+            error: "Server error while fetching bill item",
+        });
+    }
+};
+
+module.exports = { fetch, fetchById, create, update, deleteBillItem , fetchBestSellingItem};

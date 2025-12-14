@@ -3,25 +3,25 @@ const { CustomerSchema } = require("../schemas/CustomerModel");
 
 // Create
 const create = async (req, res) => {
-    try {
-        const conn = createConnection();
-        const Customer = conn.model("Customer", CustomerSchema);
+  try {
+    const conn = createConnection();
+    const Customer = conn.model("Customer", CustomerSchema);
 
-        const customerData = new Customer(req.body);
-		const valid_err = customerData.validateSync();
-		if (valid_err) {
-			return res.status(400).json(getMongoErrorMsg(valid_err.errors));
-		}
-        await customerData.save();
-        conn.close();
-
-        res.status(200).json(customerData);
-    } catch (error) {
-        console.error("Create customer error:", error);
-        res.status(500).json({
-            error: "Something went wrong while creating customer",
-        });
+    const customerData = new Customer(req.body);
+    const valid_err = customerData.validateSync();
+    if (valid_err) {
+      return res.status(400).json(getMongoErrorMsg(valid_err.errors));
     }
+    await customerData.save();
+    conn.close();
+
+    res.status(200).json(customerData);
+  } catch (error) {
+    console.error("Create customer error:", error);
+    res.status(500).json({
+      error: "Something went wrong while creating customer",
+    });
+  }
 };
 
 // Read (fetch all or search by name)
@@ -34,7 +34,7 @@ const fetch = async (req, res) => {
 
     let query = {};
     if (search) {
-      query.first_name = { $regex: search, $options: "i" } ;
+      query.first_name = { $regex: search, $options: "i" };
     }
 
     // Apply pagination
@@ -53,23 +53,62 @@ const fetch = async (req, res) => {
   }
 };
 
-const fetchById = async (req,res) => {
-	try {
-        const conn = createConnection();
-        const Customer = conn.model("Customer", CustomerSchema);
+const fetchById = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Customer = conn.model("Customer", CustomerSchema);
 
-        const {id} = req.params;
-        const customers = await Customer.findById(id);
-        conn.close();
+    const { id } = req.params;
+    const customers = await Customer.findById(id);
+    conn.close();
 
-        res.status(200).json(customers);
+    res.status(200).json(customers);
 
-    } catch (error) {
-        console.error("Fetch customers error:", error);
-        res.status(500).json({
-            error: "Server error while fetching customers",
-        });
-    }
+  } catch (error) {
+    console.error("Fetch customers error:", error);
+    res.status(500).json({
+      error: "Server error while fetching customers",
+    });
+  }
+}
+//query 1
+const fetchByPhoneNumber = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Customer = conn.model("Customer", CustomerSchema);
+
+    const { phone_number } = req.params;
+    const customers = await Customer.find({ "phone_number": String(phone_number) });
+    conn.close();
+
+    res.status(200).json(customers);
+
+  } catch (error) {
+    console.error("Fetch customers error:", error);
+    res.status(500).json({
+      error: "Server error while fetching customers",
+    });
+  }
+}
+
+//query 3
+const fetchTotalSpendByPhoneNumber = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Customer = conn.model("Customer", CustomerSchema);
+
+    const { phone_number } = req.params;
+    const customers = await Customer.aggregate([ { $match: { "phone_number": phone_number } }, { $lookup: { from: "bills", localField: "_id", foreignField: "customer_id", as: "history" } }, { $project: { _id: 0, name: { $concat: ["$first_name", " ", "$last_name"] }, total_spent: { $sum: "$history.total_amount" } } } ]);
+    conn.close();
+
+    res.status(200).json(customers);
+
+  } catch (error) {
+    console.error("Fetch customers error:", error);
+    res.status(500).json({
+      error: "Server error while fetching customers",
+    });
+  }
 }
 
 // Update Customer
@@ -131,4 +170,4 @@ const deleteCustomer = async (req, res) => {
   }
 };
 
-module.exports = { create, fetch, update, deleteCustomer , fetchById };
+module.exports = { create, fetch, update, deleteCustomer, fetchById, fetchByPhoneNumber , fetchTotalSpendByPhoneNumber};

@@ -54,6 +54,50 @@ const fetch = async (req, res) => {
   }
 };
 
+//query 2
+const fetchProductByName = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Product = conn.model("Product", ProductSchema);
+
+    const { pName } = req.params;
+    const products = await Product.find({ "product_name": { $regex: pName, $options: "i" } },
+      { _id: 0, product_name: 1, quantity: 1, price: 1 });
+    conn.close();
+
+    res.status(200).json(products);
+
+  } catch (error) {
+    console.error("Fetch products error:", error);
+    res.status(500).json({
+      error: "Server error while fetching products",
+    });
+  }
+}
+
+//query 4
+const fetchIsLowQuantity = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Product = conn.model("Product", ProductSchema);
+
+    const amount = Number(req.params.amount);
+    const pName = req.params.name;
+
+    const products = await Product.find({
+      quantity: { $lte: amount },
+      product_name: { $regex: new RegExp(pName, "i") },
+    });
+
+    await conn.close();
+    return res.status(200).json(products);
+  } catch (error) {
+    console.error("Fetch products error:", error);
+    return res.status(500).json({ error: "Server error while fetching products" });
+  }
+};
+
+
 // Update Product
 const update = async (req, res) => {
   const conn = createConnection();
@@ -115,6 +159,7 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+
 const fetchById = async (req, res) => {
   try {
     const conn = createConnection();
@@ -131,4 +176,4 @@ const fetchById = async (req, res) => {
   }
 };
 
-module.exports = { create, fetch, fetchById, update, deleteProduct };
+module.exports = { create, fetch, fetchById, update, deleteProduct, fetchProductByName, fetchIsLowQuantity };

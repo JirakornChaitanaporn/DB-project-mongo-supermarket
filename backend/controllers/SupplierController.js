@@ -23,7 +23,7 @@ const fetch = async (req, res) => {
   try {
     const conn = createConnection();
     const Supplier = conn.model("Supplier", SupplierSchema);
-    
+
     const { search, page = 1, limit = 10 } = req.query;
 
     // Build query first
@@ -45,6 +45,24 @@ const fetch = async (req, res) => {
   } catch (error) {
     console.error("Fetch suppliers error:", error);
     res.status(500).json({ error: "Server error while fetching suppliers" });
+  }
+};
+
+//query 5
+const fetchSupplierProduct = async (req, res) => {
+  try {
+    const conn = createConnection();
+    const Supplier = conn.model("Supplier", SupplierSchema);
+
+    const sName = req.params.sName;
+
+    const suppliers = await Supplier.aggregate([{ $match: { "supplier_name": { $regex: sName, $options: "i" } } }, { $lookup: { from: "products", localField: "_id", foreignField: "supplier_id", as: "catalog" } }, { $project: { supplier_name: 1, "catalog.product_name": 1, "catalog.quantity": 1 } }])
+
+    await conn.close();
+    return res.status(200).json(suppliers);
+  } catch (error) {
+    console.error("Fetch suppliers error:", error);
+    return res.status(500).json({ error: "Server error while fetching suppliers" });
   }
 };
 
@@ -119,4 +137,4 @@ const fetchById = async (req, res) => {
   }
 };
 
-module.exports = { create, fetch, fetchById, update, deleteSupplier };
+module.exports = { create, fetch, fetchById, update, deleteSupplier, fetchSupplierProduct };
