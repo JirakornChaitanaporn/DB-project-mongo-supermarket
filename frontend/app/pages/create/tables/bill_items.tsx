@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { domain_link } from "../../domain";
+import SelectEntityModal from "../../../component/Modals/selectModal";
 
-// Interfaces
 interface Bill {
   _id: string;
   total_amount: number;
@@ -16,11 +16,7 @@ interface Product {
 interface Promotion {
   _id: string;
   promotion_name: string;
-  product_id: {
-    _id: string;
-    product_name: string;
-    price: number;
-  };
+  product_id: { _id: string; product_name: string; price: number };
   discount_type: "percent" | "amount";
   discount_value: number;
   start_date: string;
@@ -28,47 +24,54 @@ interface Promotion {
 }
 
 export default function CreateBillItem() {
-  const [bill_id, setBillId] = useState<string>("");
-  const [product_id, setProductId] = useState<string>("");
-  const [quantity, setQuantity] = useState<number>(1);
-  const [promotion_id, setPromotionId] = useState<string>("");
-  const [bills, setBills] = useState<Bill[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [bill_id, setBillId] = useState("");
+  const [bill_name, setBillName] = useState("");
+
+  const [product_id, setProductId] = useState("");
+  const [product_name, setProductName] = useState("");
+  const [product_price, setProductPrice] = useState(0);
+
+  const [quantity, setQuantity] = useState(1);
+
+  const [promotion_id, setPromotionId] = useState("");
+  const [promotion_name, setPromotionName] = useState("");
   const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [message, setMessage] = useState<string>("");
 
-  // Fetch dropdown data
+  const [message, setMessage] = useState("");
+
+  const [showBillModal, setShowBillModal] = useState(false);
+  const [showProductModal, setShowProductModal] = useState(false);
+
+  // 🔥 Fetch promotions when product changes
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchPromotions = async () => {
+      if (!product_id) {
+        setPromotions([]);
+        return;
+      }
       try {
-        const [billRes, prodRes, promoRes] = await Promise.all([
-          fetch(`${domain_link}api/bill/fetch`),
-          fetch(`${domain_link}api/product/fetch`),
-          fetch(`${domain_link}api/promotion/fetch`)
-        ]);
-
-        const billData = await billRes.json();
-        const prodData = await prodRes.json();
-        const promoData = await promoRes.json();
-
-        if (billRes.ok) setBills(billData.bills || billData || []);
-        if (prodRes.ok) setProducts(prodData.products || prodData || []);
-        if (promoRes.ok) setPromotions(promoData.promotions || promoData || []);
+        const response = await fetch(
+          `${domain_link}api/promotion/fetch?product_id=${product_id}`
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setPromotions(data.promotions || []);
+        } else {
+          setPromotions([]);
+        }
       } catch (err) {
-        console.error("Error fetching dropdown data:", err);
+        console.error("Error fetching promotions:", err);
+        setPromotions([]);
       }
     };
-    fetchData();
-  }, []);
-
+    fetchPromotions();
+  }, [product_id]);
 
   // Calculate final price live
   const calculateFinalPrice = (): number => {
-    const product = products.find(p => p._id === product_id);
-    const price = product?.price || 0;
-    const subtotal = price * quantity;
+    const subtotal = product_price * quantity;
+    const promo = promotions.find((pr) => pr._id === promotion_id);
 
-    const promo = promotions.find(pr => pr._id === promotion_id);
     if (promo) {
       const now = new Date();
       const start = new Date(promo.start_date);
@@ -80,35 +83,30 @@ export default function CreateBillItem() {
           const discount = (promo.discount_value / 100) * subtotal;
           return Math.max(subtotal - discount, 0);
         } else if (promo.discount_type === "amount") {
-          return Math.max(subtotal - (promo.discount_value * quantity), 0);
+          return Math.max(subtotal - promo.discount_value * quantity, 0);
         }
       }
     }
     return subtotal;
   };
 
-  // Submit single bill item
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Submit bill item
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!bill_id || !product_id) {
       setMessage("Please select a Bill and Product.");
       return;
     }
 
     try {
-      const product = products.find(p => p._id === product_id);
-      const price = product?.price || 0;
       const final_price = calculateFinalPrice();
-
-      // Create BillItem
       const bodyData = {
         bill_id,
         product_id,
         quantity,
         promotion: promotion_id || null,
-        price,
-        final_price
+        price: product_price,
+        final_price,
       };
 
       const response = await fetch(`${domain_link}api/billitem/create`, {
@@ -122,10 +120,10 @@ export default function CreateBillItem() {
 
       if (response.ok) {
         setMessage("Bill updated with new product successfully!");
-        setBillId("");
-        setProductId("");
+        setBillId(""); setBillName("");
+        setProductId(""); setProductName(""); setProductPrice(0);
         setQuantity(1);
-        setPromotionId("");
+        setPromotionId(""); setPromotionName("");
       } else {
         const errData = await response.json();
         setMessage(errData.error || "Error updating bill");
@@ -141,38 +139,46 @@ export default function CreateBillItem() {
       <h2 className="text-2xl font-bold mb-6">Add Product to Bill</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Bill Selector */}
+        {/* Bill Selection */}
         <div>
           <label className="block font-medium">Bill:</label>
-          <select
-            value={bill_id}
-            onChange={(e) => setBillId(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          >
-            <option value="">Select Bill</option>
-            {bills.map((b) => (
-              <option key={b._id} value={b._id} className="text-black">
-                Bill #{b._id} (Total: ${b.total_amount})
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={bill_name}
+              readOnly
+              placeholder="No bill selected"
+              className="flex-1 border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
+            />
+            <button
+              type="button"
+              onClick={() => setShowBillModal(true)}
+              className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+            >
+              Select Bill
+            </button>
+          </div>
         </div>
 
-        {/* Product Selector */}
+        {/* Product Selection */}
         <div>
           <label className="block font-medium">Product:</label>
-          <select
-            value={product_id}
-            onChange={(e) => setProductId(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-          >
-            <option value="">Select Product</option>
-            {products.map((p) => (
-              <option key={p._id} value={p._id}>
-                {p.product_name} (${p.price})
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={product_name}
+              readOnly
+              placeholder="No product selected"
+              className="flex-1 border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
+            />
+            <button
+              type="button"
+              onClick={() => setShowProductModal(true)}
+              className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+            >
+              Select Product
+            </button>
+          </div>
         </div>
 
         {/* Quantity */}
@@ -183,33 +189,31 @@ export default function CreateBillItem() {
             min={1}
             value={quantity}
             onChange={(e) => setQuantity(Number(e.target.value))}
-            className="w-20 border border-gray-300 rounded px-2 py-1"
+            className="w-20 border border-gray-300 rounded px-2 py-1 bg-gray-100 text-black"
           />
         </div>
 
-        {/* Promotion Selector */}
+        {/* Promotion Dropdown */}
         <div>
           <label className="block font-medium">Promotion:</label>
           <select
             value={promotion_id}
             onChange={(e) => setPromotionId(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           >
             <option value="">No Promotion</option>
-            {promotions
-              .filter((promo) => promo.product_id?._id === product_id)
-              .map((promo) => (
-                <option key={promo._id} value={promo._id}>
-                  {promo.promotion_name}{" "}
-                  {promo.discount_type === "percent"
-                    ? `(-${promo.discount_value}%)`
-                    : `(Save $${promo.discount_value})`}
-                </option>
-              ))}
+            {promotions.map((promo) => (
+              <option key={promo._id} value={promo._id}>
+                {promo.promotion_name}{" "}
+                {promo.discount_type === "percent"
+                  ? `(-${promo.discount_value}%)`
+                  : `(Save $${promo.discount_value})`}
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Final Price Display */}
+        {/* Final Price */}
         <div>
           <label className="block font-medium">Final Price:</label>
           <p className="text-lg font-semibold text-blue-600">
@@ -217,7 +221,6 @@ export default function CreateBillItem() {
           </p>
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
@@ -227,6 +230,41 @@ export default function CreateBillItem() {
       </form>
 
       {message && <p className="mt-4 text-center text-blue-600">{message}</p>}
+
+      {/* Bill Modal */}
+      <SelectEntityModal
+        show={showBillModal}
+        title="Select Bill"
+        fetchUrl="api/bill/fetch"
+        columns={[
+          { key: "_id", label: "Bill ID" },
+          { key: "total_amount", label: "Total Amount" },
+        ]}
+        onSelect={(bill: Bill) => {
+          setBillId(bill._id);
+          setBillName(`Bill #${bill._id} (Total: $${bill.total_amount})`);
+          setShowBillModal(false);
+        }}
+        onCancel={() => setShowBillModal(false)}
+      />
+
+      {/* Product Modal */}
+      <SelectEntityModal
+        show={showProductModal}
+        title="Select Product"
+        fetchUrl="api/product/fetch"
+        columns={[
+          { key: "product_name", label: "Product" },
+          { key: "price", label: "Price" },
+        ]}
+        onSelect={(product) => {
+          setProductId(product._id);
+          setProductName(`${product.product_name} ($${product.price})`);
+          setProductPrice(product.price);
+          setShowProductModal(false);
+        }}
+        onCancel={() => setShowProductModal(false)}
+      />
     </div>
   );
 }

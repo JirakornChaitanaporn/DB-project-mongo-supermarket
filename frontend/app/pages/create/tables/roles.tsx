@@ -52,7 +52,7 @@ export default function CreateRole() {
             value={role_name}
             onChange={(e) => setRoleName(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -61,7 +61,7 @@ export default function CreateRole() {
           <textarea
             value={role_description}
             onChange={(e) => setRoleDescription(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -73,7 +73,7 @@ export default function CreateRole() {
             onChange={(e) => setRoleSalary(Number(e.target.value))}
             min={10000}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
