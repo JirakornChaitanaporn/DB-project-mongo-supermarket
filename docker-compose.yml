@@ -29,6 +29,9 @@ services:
     image: supermarket_frontend:1.0.0
     container_name: supermarket_frontend
     restart: always
+    environment:
+      WATCHPACK_POLLING: true
+      CHOKIDAR_USEPOLLING: true
     ports:
       - 5176:5173
     volumes:

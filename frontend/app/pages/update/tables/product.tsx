@@ -99,6 +99,8 @@ export default function EditProduct() {
 
       const result = await res.json();
       setMessage(`Updated product: ${result.product_name}`);
+      console.log(result);
+      
 
       setProducts(products.map((p) => (p._id === result._id ? result : p)));
     } catch (err: any) {

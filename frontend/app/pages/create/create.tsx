@@ -54,7 +54,7 @@ export function CreatePage() {
           <div className="page">
             <main className="page__main">
               <div className="page-header">
-                <h1 className="head-text">Read : {currentPage}</h1>
+                <h1 className="head-text">Create : {currentPage}</h1>
               </div>
 
               <div className="bottom-gap">

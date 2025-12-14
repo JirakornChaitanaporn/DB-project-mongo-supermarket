@@ -104,7 +104,7 @@ export default function ReadBillItems() {
           <table className="table-auto border-collapse border border-gray-300 w-full text-black">
             <thead>
               <tr className="bg-gray-300 text-left">
-                <th className="border px-4 py-2">Bill Total</th>
+                <th className="border px-4 py-2">Bill id</th>
                 <th className="border px-4 py-2">Transaction Time</th>
                 <th className="border px-4 py-2">Product</th>
                 <th className="border px-4 py-2">Quantity</th>
@@ -119,7 +119,7 @@ export default function ReadBillItems() {
                   <tr key={item._id} className="bg-gray-100 text-left">
                     <td className="border px-4 py-2 text-right">
                       {item.bill_id?.total_amount
-                        ? `$${item.bill_id.total_amount.toFixed(2)}`
+                        ? `id: ${item.bill_id?._id}`
                         : "—"}
                     </td>
                     <td className="border px-4 py-2">

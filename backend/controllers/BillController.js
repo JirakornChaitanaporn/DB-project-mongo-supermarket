@@ -51,7 +51,12 @@ const fetch = async (req, res) => {
     const bills = await Bill.find(query)
       .populate("customer_id")   // include customer details
       .populate("employee_id")   // include employee details
-      .populate("products")      // include bill items
+      .populate({
+        path: 'products',
+        populate: {
+          path: 'product_id'
+        }
+      })      // include bill items
       .skip((page - 1) * Number(limit))
       .limit(Number(limit));
 
