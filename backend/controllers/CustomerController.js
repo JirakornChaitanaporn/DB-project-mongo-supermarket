@@ -100,8 +100,7 @@ const fetchTotalSpendByPhoneNumber = async (req, res) => {
     const { phone_number } = req.params;
     const customers = await Customer.aggregate([ { $match: { "phone_number": phone_number } }, 
       { $lookup: { from: "bills", localField: "_id", foreignField: "customer_id", as: "history" } }, 
-      { $project: { _id: 0, name: 
-        { $concat: ["$first_name", " ", "$last_name"] }, 
+      { $project: { _id: 0, name: { $concat: ["$first_name", " ", "$last_name"] }, 
       total_spent: { $sum: "$history.total_amount" } } } ]);
     conn.close();
 
