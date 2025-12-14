@@ -134,7 +134,9 @@ const fetchRankEmployee = async (req, res) => {
     const start_date = req.params.start_date;
     const end_date = req.params.end_date;
 
-    const employee = await Employee.aggregate([ { $match: { "transaction_time": { $gte: new Date(start_date), $lte: new Date(end_date) } } }, { $group: { _id: "$employee_id", sales: { $sum: "$total_amount" } } }, { $sort: { sales: -1 } } ]);
+    const employee = await Employee.aggregate([ 
+      { $match: { "transaction_time": { $gte: new Date(start_date), $lte: new Date(end_date) } } }, 
+      { $group: { _id: "$employee_id", sales: { $sum: "$total_amount" } } }, { $sort: { sales: -1 } } ]);
 
     await conn.close();
     res.status(200).json(employee);

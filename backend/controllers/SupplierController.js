@@ -56,7 +56,9 @@ const fetchSupplierProduct = async (req, res) => {
 
     const sName = req.params.sName;
 
-    const suppliers = await Supplier.aggregate([{ $match: { "supplier_name": { $regex: sName, $options: "i" } } }, { $lookup: { from: "products", localField: "_id", foreignField: "supplier_id", as: "catalog" } }, { $project: { supplier_name: 1, "catalog.product_name": 1, "catalog.quantity": 1 } }])
+    const suppliers = await Supplier.aggregate([{ $match: { "supplier_name": { $regex: sName, $options: "i" } } }, 
+      { $lookup: { from: "products", localField: "_id", foreignField: "supplier_id", as: "catalog" } }, 
+      { $project: { supplier_name: 1, "catalog.product_name": 1, "catalog.quantity": 1 } }])
 
     await conn.close();
     return res.status(200).json(suppliers);
