@@ -1,34 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { domain_link } from "../../domain";
+import SelectEntityModal from "../../../component/Modals/selectModal";
 
 export default function CreateBill() {
   const [customer_id, setCustomerId] = useState<string | null>(null);
+  const [customer_name, setCustomerName] = useState("");
   const [employee_id, setEmployeeId] = useState("");
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [employees, setEmployees] = useState<any[]>([]);
+  const [employee_name, setEmployeeName] = useState("");
   const [message, setMessage] = useState("");
 
-  // Fetch dropdown data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [custRes, empRes] = await Promise.all([
-          fetch(`${domain_link}api/customer/fetch`),
-          fetch(`${domain_link}api/employee/fetch`)
-        ]);
-
-        const custData = await custRes.json();
-        const empData = await empRes.json();
-
-        if (custRes.ok) setCustomers(Array.isArray(custData) ? custData : custData.customers || []);
-        if (empRes.ok) setEmployees(Array.isArray(empData) ? empData : empData.employees || []);
-      } catch (err) {
-        console.error("Error fetching dropdown data:", err);
-      }
-    };
-    fetchData();
-  }, []);
-
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [showEmployeeModal, setShowEmployeeModal] = useState(false);
 
   // Submit bill
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,8 +29,10 @@ export default function CreateBill() {
 
       if (response.ok) {
         setMessage("Bill created successfully!");
-        setCustomerId("");
+        setCustomerId(null);
+        setCustomerName("");
         setEmployeeId("");
+        setEmployeeName("");
       } else {
         setMessage(data.error || "Error creating bill");
       }
@@ -63,45 +47,51 @@ export default function CreateBill() {
       <h2 className="text-2xl font-bold mb-6">Create Bill</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Customer */}
+        {/* Customer Selection */}
         <div>
           <label className="block font-medium">Customer:</label>
-          <select
-            value={customer_id ?? ""}
-            onChange={(e) => setCustomerId(e.target.value === "null" ? null : e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          >
-            {/* None option */}
-            <option value="null" className="text-black">Guest</option>
-
-            {/* Existing customers */}
-            {customers.map((c) => (
-              <option key={c._id} value={c._id} className="text-black">
-                {c.first_name} {c.last_name.charAt(0).toUpperCase() + "."}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={customer_name || "Guest"}
+              readOnly
+              className="flex-1 border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
+            />
+            <button
+              type="button"
+              onClick={() => setShowCustomerModal(true)}
+              className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+            >
+              Select Customer
+            </button>
+          </div>
         </div>
 
-        {/* Employee */}
+        {/* Employee Selection */}
         <div>
           <label className="block font-medium">Employee:</label>
-          <select
-            value={employee_id}
-            onChange={(e) => setEmployeeId(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          >
-            <option value="" className="text-black">Select Employee</option>
-            {employees.map((e) => (
-              <option key={e._id} value={e._id} className="text-black">
-                {e.first_name} {e.last_name.charAt(0).toUpperCase() + "."}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={employee_name}
+              readOnly
+              placeholder="No employee selected"
+              className="flex-1 border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
+            />
+            <button
+              type="button"
+              onClick={() => setShowEmployeeModal(true)}
+              className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+            >
+              Select Employee
+            </button>
+          </div>
         </div>
 
         <div>
-          <label className="block font-medium text-red-800">Bill Product will be add from Bill_Item.</label>
+          <label className="block font-medium text-red-800">
+            Bill products will be added from Bill_Item.
+          </label>
         </div>
 
         {/* Submit */}
@@ -114,6 +104,40 @@ export default function CreateBill() {
       </form>
 
       {message && <p className="mt-4 text-center text-blue-600">{message}</p>}
+
+      {/* Customer Modal */}
+      <SelectEntityModal
+        show={showCustomerModal}
+        title="Select Customer"
+        fetchUrl="api/customer/fetch"
+        columns={[
+          { key: "first_name", label: "First Name" },
+          { key: "last_name", label: "Last Name" },
+        ]}
+        onSelect={(customer) => {
+          setCustomerId(customer._id);
+          setCustomerName(`${customer.first_name} ${customer.last_name}`);
+          setShowCustomerModal(false);
+        }}
+        onCancel={() => setShowCustomerModal(false)}
+      />
+
+      {/* Employee Modal */}
+      <SelectEntityModal
+        show={showEmployeeModal}
+        title="Select Employee"
+        fetchUrl="api/employee/fetch"
+        columns={[
+          { key: "first_name", label: "First Name" },
+          { key: "last_name", label: "Last Name" },
+        ]}
+        onSelect={(employee) => {
+          setEmployeeId(employee._id);
+          setEmployeeName(`${employee.first_name} ${employee.last_name}`);
+          setShowEmployeeModal(false);
+        }}
+        onCancel={() => setShowEmployeeModal(false)}
+      />
     </div>
   );
 }

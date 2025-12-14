@@ -58,7 +58,7 @@ export default function CreateCustomer() {
             value={first_name}
             onChange={(e) => setFirstName(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -69,7 +69,7 @@ export default function CreateCustomer() {
             value={last_name}
             onChange={(e) => setLastName(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -79,7 +79,7 @@ export default function CreateCustomer() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -89,7 +89,7 @@ export default function CreateCustomer() {
             type="text"
             value={phone_number}
             onChange={(e) => setPhoneNumber(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -99,7 +99,7 @@ export default function CreateCustomer() {
             type="number"
             value={loyalty_point}
             onChange={(e) => setLoyaltyPoint(Number(e.target.value))}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 

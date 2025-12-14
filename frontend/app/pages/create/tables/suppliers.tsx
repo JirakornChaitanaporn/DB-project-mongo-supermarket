@@ -71,7 +71,7 @@ export default function CreateSupplier() {
             value={supplier_name}
             onChange={(e) => setSupplierName(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -82,7 +82,7 @@ export default function CreateSupplier() {
             value={person}
             onChange={(e) => setPerson(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -92,7 +92,7 @@ export default function CreateSupplier() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -103,7 +103,7 @@ export default function CreateSupplier() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -114,7 +114,7 @@ export default function CreateSupplier() {
             value={street}
             onChange={(e) => setStreet(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -125,7 +125,7 @@ export default function CreateSupplier() {
             value={city}
             onChange={(e) => setCity(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -136,7 +136,7 @@ export default function CreateSupplier() {
             value={postal_code}
             onChange={(e) => setPostalCode(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -147,7 +147,7 @@ export default function CreateSupplier() {
             value={country}
             onChange={(e) => setCountry(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
