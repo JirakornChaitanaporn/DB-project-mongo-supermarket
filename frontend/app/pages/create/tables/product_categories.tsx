@@ -48,7 +48,7 @@ export default function CreateProductCategories() {
             value={category_name}
             onChange={(e) => setCategoryName(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -57,7 +57,7 @@ export default function CreateProductCategories() {
           <textarea
             value={category_description}
             onChange={(e) => setCategoryDesc(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 

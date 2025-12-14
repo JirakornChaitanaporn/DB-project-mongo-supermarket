@@ -18,13 +18,18 @@ export default function CreateEmployee() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+  if (!role_id) {
+    setMessage("Please select a role before submitting");
+    return;
+  }
+
     const bodyData = {
       first_name,
       last_name,
       phone_number,
       gender,
       role_id,
-      hire_date: hire_date ? new Date(hire_date) : new Date(),
+      hire_date: hire_date || new Date().toISOString().split("T")[0],
     };
 
     try {
@@ -62,7 +67,7 @@ export default function CreateEmployee() {
             value={first_name}
             onChange={(e) => setFirstName(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -73,7 +78,7 @@ export default function CreateEmployee() {
             value={last_name}
             onChange={(e) => setLastName(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -83,7 +88,7 @@ export default function CreateEmployee() {
             type="text"
             value={phone_number}
             onChange={(e) => setPhoneNumber(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
@@ -92,7 +97,7 @@ export default function CreateEmployee() {
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           >
             <option value="">Select Gender</option>
             <option value="Male" style={{ color: "black" }}>Male</option>
@@ -109,7 +114,7 @@ export default function CreateEmployee() {
               value={role_name}
               readOnly
               placeholder="No role selected"
-              className="flex-1 border border-gray-300 rounded px-3 py-2 bg-gray-100"
+              className="flex-1 border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
             />
             <button
               type="button"
@@ -127,7 +132,7 @@ export default function CreateEmployee() {
             type="date"
             value={hire_date}
             onChange={(e) => setHireDate(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-black"
           />
         </div>
 
