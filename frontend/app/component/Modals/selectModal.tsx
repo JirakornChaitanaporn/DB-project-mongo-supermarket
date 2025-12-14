@@ -37,7 +37,9 @@ export default function SelectEntityModal({
         const response = await fetch(`${domain_link}${fetchUrl}?${queryParams.toString()}`);
         const data = await response.json();
         if (response.ok) {
-          setEntities(data.roles || data.customers || data.employees || []); // adapt based on API
+          setEntities(
+            data.bills || data.products || data.roles || data.customers || data.employees || data.categories  || data.suppliers ||[]
+          );
           setTotal(data.total || 0);
         }
       } catch (err) {
